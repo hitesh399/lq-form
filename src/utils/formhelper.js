@@ -1,0 +1,209 @@
+const validate = require("validate.js");
+const _  = require('lodash');
+import helper from 'vuejs-object-helper';
+
+export default {
+
+    install (Vue, options) {
+        const store = options.store;
+        
+        Object.defineProperty(Vue.prototype, '$lqForm',   {value: new formHelper(store ) });
+    }
+}
+
+export  function formHelper (store ) {
+    
+    /**
+     * To set the submit status
+     * @param {String} formName 
+     * @param {Boolean} status 
+     */
+    this.submiting = function (formName, status) {
+			
+        store.dispatch('form/isSubmiting', {formName, status});
+    }
+    /**
+     * TO submit the form.
+     * @param {String} formName 
+     */
+    this.submit = function(formName, data, shouldEmitEvents, getters) {
+        getters = getters ? getters : store.getters;
+        let settings = getters['form/settings'](formName);
+        return settings.submit(data, shouldEmitEvents);
+    }
+    /**
+     * To get Element value
+     * @param {String} formName 
+     * @param {String} elementName 
+     * @param {String} value 
+     */
+    this.setElementVal = function (formName, elementName, value) {
+        store.dispatch('form/setElementValue', {formName, elementName, value });
+    }
+    /**
+     * To set the initialized values
+     * @param {String} formName 
+     * @param {Object} values 
+     */
+    this.initializeValues = function (formName, values) {
+
+        store.dispatch('form/initializeValues', {formName, values});
+    }
+
+    /**
+     * To reset the form data.
+     * @param {String} formName 
+     */
+    this.resetForm = function (formName) {
+
+        store.dispatch('form/resetForm', {formName});
+    }
+
+    /**
+     * To delete the element key
+     * @param {*} formName 
+     * @param {*} elementName 
+     */
+    this.removeElement = function (formName, elementName) {
+
+        store.dispatch('form/removeElement', {formName, elementName});
+    }
+
+    this.addErrors = function (formName, errors) {
+
+        store.dispatch('form/addErrors', {formName, errors});
+    }
+
+    this.addError = function (formName, elementName, errors) {
+        store.dispatch('form/addError', {formName, elementName, errors});
+    }
+
+    this.removeError = function (formName, elementName) {
+        
+        store.dispatch('form/removeError', {formName, elementName});
+    }
+
+    /**
+     * To delete the complete form.
+     */
+    this.deleteForm = function (formName) {
+        store.dispatch('form/removeForm', {formName});
+    }
+    
+    this.ready  = function (formName, status) {
+        
+        store.dispatch('form/isReady', {formName, status});
+    }
+    /**
+     * To set the form permission
+     */
+    this.setPermission = function (formName, permission) {   
+        store.dispatch('form/setPermission', {formName, permission});
+    }
+
+    /**
+     * To make the element as touch/untouch.
+     * @param {String} formName 
+     * @param {String} elementName 
+     */
+    this.touchStatus = function (formName, elementName, value) {
+        store.dispatch('form/addProp', {formName, elementName, key: 'touch', value});
+    }
+    /**
+     * change element validating status.
+     * @param {String} formName 
+     * @param {String} elementName 
+     */
+    this.validatingStatus = function (formName, elementName, value) {
+        store.dispatch('form/addProp', {formName, elementName, key: 'validating', value});
+    }
+
+    /**
+     * To add setting data.
+     * @param {String} formName 
+     * @param {String} elementName 
+     * @param {String} key [setting key]
+     * @param {String} value [setting value]
+     */
+    this.addProp = function (formName, elementName, key, value) {
+        store.dispatch('form/addProp', {formName, elementName, key, value});
+    }
+    
+    /**
+     * To add all props of element.
+     * @param {String} formName 
+     * @param {String} elementName 
+     * @param {Object} props 
+     */
+    this.addProps = function(formName, elementName, props) {
+        
+        store.dispatch('form/addProps', { formName, elementName, value: props});
+    }
+    
+    this.addTransformKey = function(formName, key) {
+        
+        store.dispatch('form/addTransformKey', { formName, key});
+    }
+    /**
+     * Get valid form data.
+     */
+    this.formData = function(formName, getters) {
+        getters = getters ? getters : store.getters;
+        const formData = _.cloneDeep(getters['form/values'](formName));
+        let settings = getters['form/settings'](formName);
+        let fields =  getters['form/fields'](formName);
+        let transformKeys = settings.transformKeys ? settings.transformKeys : null;
+        let extraDataKeys = settings.extraDataKeys ? settings.extraDataKeys : null;
+
+        let data = {};
+        // Get element value and make it formatted.
+        const fields_arr = Object.keys(fields);
+        fields_arr.forEach((fieldName) => {
+            let formatter = helper.getProp(fields, [fieldName, 'formatter']);
+            if (typeof formatter === 'function') {
+                helper.setProp(data, fieldName, formatter());
+            }
+            else {
+                helper.setProp(data, fieldName, helper.getProp(formData, fieldName));
+            }
+        });
+
+        extraDataKeys && extraDataKeys.forEach(extraKey => {
+           const val = helper.getProp(formData, extraKey, '');
+           helper.setProp(data, extraKey, val);
+        });
+        // Replace the object key name.
+        this.transformDataKey(data, transformKeys);
+        return data;
+    }
+    /**
+     * To delete unnecessary 
+     */
+    this.deleteDirtyData = function (data, excludeInput) {
+			
+        if(excludeInput &&  helper.isArray(excludeInput) && excludeInput.length) {
+            
+            excludeInput.map(function(excludeKey) {
+                helper.deleteProp(data, excludeKey);
+            })				
+        }			
+    }
+    /**
+     * To Replace the Object key
+     */
+    this.transformDataKey = function (data, transformKeys) {
+        if(!transformKeys) return;
+        transformKeys.forEach( (tk) => {      
+            const keys = tk.split(':');
+            if(keys.length === 2) {
+                const dataKeyFrom = keys[0];
+                const dataKeyto = keys[1];
+                if(data[dataKeyFrom] !== undefined) {
+                    const val = data[dataKeyFrom];
+                    delete data[dataKeyFrom];
+                    data[dataKeyto] = val;
+                }
+            }
+        });
+    }
+}
