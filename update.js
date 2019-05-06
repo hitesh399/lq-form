@@ -11,7 +11,8 @@ var options = {
 }
 
 const locations = [
-	{srcPath:'./dist', destPath: '../element-ui/node_modules/vuex-lq-form/dist' },
+	{srcPath:'./dist', destPath: '../vuetify/node_modules/lq-form/dist' },
+	{srcPath:'./dist', destPath: '../../lq_client_sample/node_modules/lq-form/dist' },
 ]
 
 

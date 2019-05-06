@@ -16,11 +16,9 @@ const formElementMix = {
         return 'change';
       }
     },
-    isInitialValue: {
-      type: Boolean,
-      default: function () {
-        return true;
-      }
+    initValue: {
+      type: [String, Array, Object, undefined],
+      default: () => null
     },
     disabled: Boolean,
   },
@@ -103,8 +101,7 @@ const formElementMix = {
     LQElement: {
 
       get: function () {
-
-        return this.value;
+        return helper.getProp(this.$store.state.form,`${this.formName}.values.${this.id}`);
       },
       set: function (value, event) {
         this.setValue(value);
@@ -116,20 +113,27 @@ const formElementMix = {
     return {
       formName: null,
       validationCallback: null,
-      initialValue: null,
+      makeInItVal: undefined,
       asyncValidation: false,
       rules: null,
     }
   },
   inject: ['lqForm'],
   created () {
-
     this.formName = this.lqForm.name;
-    // Add initial value if does not already have the value.
-    if(!this.getValue() && this.isInitialValue) {
-      this.setValue(this.initialValue, false);
+    
+    if (helper.isArray(this.initValue)) {
+      this.makeInItVal = this.initValue.slice();
+    }else if (helper.isObject(this.initValue)) {
+      this.makeInItVal = {...this.initValue}
+    } else {
+      this.makeInItVal = this.initValue;
     }
 
+    // Add initial value if does not already have the value.
+    if(validate.isEmpty(this.LQElement) && this.makeInItVal !== undefined) {
+      this.setValue( this.makeInItVal, false);
+    }
     /**
      * Add Element props
      */
@@ -161,8 +165,8 @@ const formElementMix = {
         this.removeError();
       }
       // For: Element name should always present in data collecton.
-      if(this.isInitialValue || value){
-        value = !value ? this.initialValue : value;
+      if(this.makeInItVal !== undefined || value){
+        value = !value ? this.makeInItVal : value;
         this.$lqForm.setElementVal(this.formName, this.id, value)
       }
       else {
@@ -263,7 +267,6 @@ const formElementMix = {
         validation_rules[this.id] = this.rules;
       }
       element_values[this.id] = this.LQElement;
-
       const test = await new Promise((resolve) => {
         validate.async(element_values, validation_rules, options)
           .then( (response) => {
@@ -288,7 +291,7 @@ const formElementMix = {
      * @param {Object} event
      */
     emitNativeEvent: function(event) {
-      this.$emit(event.type, event, this.getValue());
+      this.$emit(event.type, event, this.LQElement);
       /**
        * Check the Validation
        */

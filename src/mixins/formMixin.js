@@ -21,7 +21,11 @@ const formMixin = {
 			type: Object,
 			default: function () { return {}; }
 		},
-		request: Function,
+		requestMethod: {
+			type: String,
+			default: () => 'POST'
+		},
+		action: String,
 		displayInlineError: {
 			type: Boolean,
 			default: function () {return true}
@@ -57,7 +61,8 @@ const formMixin = {
 		this.$store.dispatch('form/addSettings', {formName: this.formName, settings: {
 			transformKeys: this.transformKeys,
 			extraDataKeys: this.extraDataKeys,
-			submit: this.submit
+			submit: this.submit,
+			test: this.validate
 		}});
 	},
 	/*
@@ -242,44 +247,43 @@ const formMixin = {
 				data = {...data, ...more_data};
 			}
 			// When form data is valid
-			if (!this.request) {
+			if (!this.action || !this.$axios) {
+				console.warn('You must have to define the action in form props and $axios as vue property.')
 				return;
 			}
 			this.submiting(true);
+			return this.this.$axios({
+				url: this.action,
+				method: this.requestMethod,
+				data
+			})
+			.then((response) => {
+				this.submiting(false);
+				if(shouldEmitEvents) {
+					this.$emit('submited-success', response, this);
+					this.$root.$emit('submited-success', response, this);
+				}
+				return Promise.resolve(response);
+			})
+			.catch((error) => {
 
-			return this.request(data)
-				.then((response) => {
+				this.submiting(false);
+				if (shouldEmitEvents) {
+					this.$emit('submited-error', error, this);
+					this.$root.$emit('submited-error', error, this);
+				}
+				if (helper.getProp(error, 'response.status') === 422 && this.displayInlineError) { 					  
+					this.addErrors(error.response.data.errors);
+					const error_field = helper.getProp(error, 'response.data.errors', {});
+					const error_field_names = error_field ? Object.keys(error_field) : [];
 
-					this.submiting(false);
-
-					if(shouldEmitEvents) {
-
-						this.$emit('submited-success', response, this);
-						this.$root.$emit('submited-success', response, this);
+					if (error_field_names.length && this.scrollToErrorField) {
+						const element = document.getElementById(error_field_names[0]);
+						element ? element.scrollIntoView(): null;
 					}
-					return Promise.resolve(response);
-				})
-				.catch((error) => {
-
-					this.submiting(false);
-					if (shouldEmitEvents) {
-						this.$emit('submited-error', error, this);
-						this.$root.$emit('submited-error', error, this);
-					}
-
-					if (helper.getProp(error, 'response.status') === 422 && this.displayInlineError) { 					  
-						this.addErrors(error.response.data.errors);
-						const error_field = helper.getProp(error, 'response.data.errors', {});
-						const error_field_names = error_field ? Object.keys(error_field) : [];
-
-						if (error_field_names.length && this.scrollToErrorField) {
-							const element = document.getElementById(error_field_names[0]);
-							element ? element.scrollIntoView(): null;
-						}
-					}
-
-					return Promise.reject(error)
-				})
+				}
+				return Promise.reject(error)
+			})
 		},
 		canSubmit: function() {
 			return this.isReady && !this.isSubmiting;

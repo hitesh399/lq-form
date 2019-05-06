@@ -19,8 +19,11 @@ export  function formHelper (store ) {
      * @param {Boolean} status 
      */
     this.submiting = function (formName, status) {
-			
         store.dispatch('form/isSubmiting', {formName, status});
+    }
+    this.errors = function (formName, getters) {
+        getters = getters ? getters : store.getters;
+        return getters['form/errros'](formName);
     }
     /**
      * TO submit the form.
@@ -46,8 +49,20 @@ export  function formHelper (store ) {
      * @param {Object} values 
      */
     this.initializeValues = function (formName, values) {
-
         store.dispatch('form/initializeValues', {formName, values});
+        this.validateIfHas(formName);
+    }
+    this.validate = function (formName, getters) {
+        getters = getters ? getters : store.getters;
+        let settings = getters['form/settings'](formName);
+        if(typeof settings.test === 'function') {
+            settings.test();
+        }
+    }
+    this.validateIfHas = function (formName) {
+        if (!validate.isEmpty(this.errors(formName))) {
+            this.validate(formName)
+        }
     }
 
     /**
@@ -55,8 +70,8 @@ export  function formHelper (store ) {
      * @param {String} formName 
      */
     this.resetForm = function (formName) {
-
         store.dispatch('form/resetForm', {formName});
+        this.validateIfHas(formName);
     }
 
     /**
@@ -91,7 +106,6 @@ export  function formHelper (store ) {
     }
     
     this.ready  = function (formName, status) {
-        
         store.dispatch('form/isReady', {formName, status});
     }
     /**

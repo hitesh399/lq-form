@@ -105,7 +105,7 @@ const actions = {
 	resetForm({commit, state}, {formName}) {
 
 		const initialize_values = helper.getProp(state, [formName, 'initialize_values'], {});
-		commit('saveValues', {formName, values: initialize_values});
+		commit('saveValues', {formName, values: _.cloneDeep(initialize_values)});
 	},
 	
 	/**
