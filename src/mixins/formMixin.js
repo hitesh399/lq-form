@@ -26,6 +26,10 @@ const formMixin = {
 			default: () => 'POST'
 		},
 		action: String,
+		contentType: {
+			type: String,
+			default: () => 'json'	
+		},
 		displayInlineError: {
 			type: Boolean,
 			default: function () {return true}
@@ -251,9 +255,23 @@ const formMixin = {
 				console.warn('You must have to define the action in form props and $axios as vue property.')
 				return;
 			}
-			this.submiting(true);
+			this.submiting(true);	
+
+			if (this.contentType === 'formdata' && this.requestMethod === 'GET') {
+				console.warn('For get Method fordata is not possible.');
+				return;
+			}
+			
+			if (this.contentType === 'formdata') {
+				data = helper.objectToFormData(data);
+			}
+
+			let url = this.action;
+			if (this.requestMethod === 'GET') {
+				url += helper.objectToQueryString(data)
+			}
 			return this.this.$axios({
-				url: this.action,
+				url: url,
 				method: this.requestMethod,
 				data
 			})
