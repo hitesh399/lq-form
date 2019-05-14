@@ -252,7 +252,7 @@ const formMixin = {
 				return;
 			}
 			this.submiting(true);
-			return this.this.$axios({
+			return this.$axios({
 				url: this.action,
 				method: this.requestMethod,
 				data

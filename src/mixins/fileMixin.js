@@ -63,6 +63,7 @@ const fileMixin = {
 
             const value = file ? {
                 file: file,
+                original: file,
                 uid: uid,
                 status: 'ready'
             } : defaultValue;
