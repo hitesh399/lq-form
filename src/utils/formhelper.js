@@ -172,12 +172,9 @@ export  function formHelper (store ) {
         const fields_arr = Object.keys(fields);
         fields_arr.forEach((fieldName) => {
             let formatter = helper.getProp(fields, [fieldName, 'formatter']);
-            if (typeof formatter === 'function') {
-                helper.setProp(data, fieldName, formatter());
-            }
-            else {
-                helper.setProp(data, fieldName, helper.getProp(formData, fieldName));
-            }
+            let value = (typeof formatter === 'function') ? formatter() : helper.getProp(formData, fieldName);
+            value = value ? value : null;
+            helper.setProp(data, fieldName, value);
         });
 
         extraDataKeys && extraDataKeys.forEach(extraKey => {
@@ -192,12 +189,10 @@ export  function formHelper (store ) {
      * To delete unnecessary 
      */
     this.deleteDirtyData = function (data, excludeInput) {
-			
         if(excludeInput &&  helper.isArray(excludeInput) && excludeInput.length) {
-            
             excludeInput.map(function(excludeKey) {
                 helper.deleteProp(data, excludeKey);
-            })				
+            })
         }			
     }
     /**
