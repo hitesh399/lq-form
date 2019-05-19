@@ -150,12 +150,10 @@ export  function formHelper (store ) {
      * @param {Object} props 
      */
     this.addProps = function(formName, elementName, props) {
-        
         store.dispatch('form/addProps', { formName, elementName, value: props});
     }
     
     this.addTransformKey = function(formName, key) {
-        
         store.dispatch('form/addTransformKey', { formName, key});
     }
     /**
@@ -212,10 +210,12 @@ export  function formHelper (store ) {
             if(keys.length === 2) {
                 const dataKeyFrom = keys[0];
                 const dataKeyto = keys[1];
-                if(data[dataKeyFrom] !== undefined) {
-                    const val = data[dataKeyFrom];
-                    delete data[dataKeyFrom];
-                    data[dataKeyto] = val;
+                if (helper.getProp(data, dataKeyFrom)) {
+                    const val = helper.getProp(data, dataKeyFrom);
+                    helper.deleteProp(data, dataKeyFrom);
+                    helper.setProp(data, dataKeyto, val)
+                } else {
+                    helper.setProp(data, dataKeyto, null)
                 }
             }
         });

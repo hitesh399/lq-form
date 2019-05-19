@@ -22,11 +22,11 @@ import fileValidation from './validate/FileValidation';
 /**
  * Register Custom Validation Rule.
  */
-validate.validators.file = function(value, rules,  id, formName, formValues ) {
-    return fileValidation(value, rules, id, formName, formValues)
+validate.validators.file = function(value, rules,  id, values, options ) {
+    return fileValidation(value, rules, id, values, options)
 };
 
-export { lqElementMixin, lqFormMixin, lqFileMixin, lqFormHelper, lqPermissionMixin };
+export { lqElementMixin, lqFormMixin, lqFileMixin, lqFormHelper, lqPermissionMixin, validate };
 
 export default {
     // The install method will be called with the Vue constructor as
