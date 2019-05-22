@@ -1,6 +1,6 @@
 import helper from 'vuejs-object-helper';
 const _  = require('lodash');
-const validateJs = require('validate.js');
+// const validateJs = require('validate.js');
 
 const formMixin = {
 
@@ -206,7 +206,7 @@ const formMixin = {
 		},
 		hasError: function () {
 			const errors = this.getErrors();
-			if(validateJs.isEmpty(errors)){
+			if(window.validatejs.isEmpty(errors)){
 				return false;
 			}
 			return true;

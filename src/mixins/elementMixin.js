@@ -1,5 +1,5 @@
 import helper from 'vuejs-object-helper';
-const validate = require("validate.js");
+// const validate = require('validate.js');
 const _  = require('lodash');
 const formElementMix = {
 
@@ -131,7 +131,7 @@ const formElementMix = {
     }
 
     // Add initial value if does not already have the value.
-    if(validate.isEmpty(this.LQElement) && this.makeInItVal !== undefined) {
+    if (window.validatejs.isEmpty(this.LQElement) && this.makeInItVal !== undefined) {
       this.setValue( this.makeInItVal, false);
     }
     /**
@@ -258,7 +258,7 @@ const formElementMix = {
       let validation_rules = {};
       let element_values = {};
 
-      if (this.validateArrayIndex && validate.isArray(this.LQElement)) {
+      if (this.validateArrayIndex && window.validatejs.isArray(this.LQElement)) {
         this.LQElement.forEach((singleVal, index) => {
           validation_rules[this.id + '\\.' + index] = this.rules;
           element_values[this.id + '.' + index] = singleVal;
@@ -268,7 +268,7 @@ const formElementMix = {
       }
       element_values[this.id] = this.LQElement;
       const test = await new Promise((resolve) => {
-        validate.async(element_values, validation_rules, options)
+        window.validatejs.async(element_values, validation_rules, options)
           .then( (response) => {
             this.validationCallback ? this.validationCallback():  resolve();
             this.validationCallback = null;

@@ -1,4 +1,4 @@
-import validate from 'validate.js';
+// import validate from 'validate.js';
 import helper, {isImage, checkFileExtensions} from 'vuejs-object-helper';
 import errorLang from './fileErrorLang';
 
@@ -13,9 +13,9 @@ export function generateErrorMessage (type, attribues, message) {
         if( typeof message === 'function') {
             return message(type, attribues);
         }
-        return validate.format(message.toString(), attribues);
+        return window.validatejs.format(message.toString(), attribues);
     }
-    return validate.format(errorLang[type], attribues);
+    return window.validatejs.format(errorLang[type], attribues);
 }
 
 /**

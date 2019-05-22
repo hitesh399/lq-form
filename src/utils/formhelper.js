@@ -1,4 +1,4 @@
-const validate = require("validate.js");
+// const validate = require('validate.js');
 const _  = require('lodash');
 import helper from 'vuejs-object-helper';
 
@@ -60,7 +60,7 @@ export  function formHelper (store ) {
         }
     }
     this.validateIfHas = function (formName) {
-        if (!validate.isEmpty(this.errors(formName))) {
+        if (!window.validatejs.isEmpty(this.errors(formName))) {
             this.validate(formName)
         }
     }
