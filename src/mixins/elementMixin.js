@@ -2,9 +2,7 @@ import helper from 'vuejs-object-helper';
 // const validate = require('validate.js');
 const _  = require('lodash');
 const formElementMix = {
-
   props: {
-
     id: {
       type: String,
       required: true
@@ -16,6 +14,7 @@ const formElementMix = {
         return 'change';
       }
     },
+    customValueTransformer: Function,
     initValue: {
       type: [String, Array, Object, undefined],
       default: () => null
@@ -164,6 +163,11 @@ const formElementMix = {
       if(!this.rules && this.error){
         this.removeError();
       }
+      
+      if (typeof this.customValueTransformer === 'function') {
+        value = this.customValueTransformer(value);
+      }
+
       // For: Element name should always present in data collecton.
       if(this.makeInItVal !== undefined || value){
         value = !value ? this.makeInItVal : value;
