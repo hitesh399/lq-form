@@ -97,6 +97,10 @@ export  function formHelper (store ) {
         
         store.dispatch('form/removeError', {formName, elementName});
     }
+    this.removeErrors = function (formName) {
+        
+        store.dispatch('form/removeErrors', {formName});
+    }
 
     /**
      * To delete the complete form.

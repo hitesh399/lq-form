@@ -217,7 +217,7 @@ const formMixin = {
 		},
 		hasError: function () {
 			const errors = this.getErrors();
-			if(window.validatejs.isEmpty(errors)){
+			if (window.validatejs.isEmpty(errors)) {
 				return false;
 			}
 			return true;
@@ -249,6 +249,8 @@ const formMixin = {
 				this.$root.$emit('can-not-submit', this);
 				return;
 			}
+			this.$lqForm.removeErrors(this.formName);
+			
 			await this.validate();
 			
 			if (this.hasError()) {
