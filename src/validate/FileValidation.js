@@ -10,8 +10,10 @@ import errorLang from './fileErrorLang';
  */
 export function generateErrorMessage (type, attribues, message) {
     if (message) {
-        if( typeof message === 'function') {
+        if ( typeof message === 'function') {
             return message(type, attribues);
+        } else if (typeof message === 'object' && message[type]) {
+            return window.validatejs.format(message[type].toString(), attribues);
         }
         return window.validatejs.format(message.toString(), attribues);
     }
