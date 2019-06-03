@@ -74,7 +74,6 @@ const fileMixin = {
                 value: value
             }
             const action = this.multiple ? 'form/addNewElement' : 'form/setElementValue';
-
             this.$store.dispatch(action, data);
         }
 	}

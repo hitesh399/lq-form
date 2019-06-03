@@ -39,7 +39,8 @@ const formMixin = {
 	},
 	data: function(){
 		return {
-			formName: null
+			formName: null,
+			renderComponent: true
 		}
 	},
 	provide() {
@@ -59,15 +60,7 @@ const formMixin = {
 
 	},
 	created: function () {
-		this.formName = this.name;
-		this.ready(true);
-		this.submiting(false);
-		this.$store.dispatch('form/addSettings', {formName: this.formName, settings: {
-			transformKeys: this.transformKeys,
-			extraDataKeys: this.extraDataKeys,
-			submit: this.submit,
-			test: this.validate
-		}});
+		this.setup();
 	},
 	/*
 	 |--------------------------------------------------------------------------------
@@ -115,8 +108,26 @@ const formMixin = {
 	},
 
 	methods: {
-
-
+		forceRerender() {
+			// Remove my-component from the DOM
+			this.renderComponent = false;
+		
+			this.$nextTick(() => {
+				// Add the component back in
+				this.renderComponent = true;
+			});
+		},
+		setup: function () {
+			this.formName = this.name;
+			this.ready(true);
+			this.submiting(false);
+			this.$store.dispatch('form/addSettings', {formName: this.formName, settings: {
+				transformKeys: this.transformKeys,
+				extraDataKeys: this.extraDataKeys,
+				submit: this.submit,
+				test: this.validate
+			}});
+		},
 		/*
 		 |-----------------------------------
 		 | To get given element value
@@ -206,7 +217,7 @@ const formMixin = {
 		},
 		hasError: function () {
 			const errors = this.getErrors();
-			if(window.validatejs.isEmpty(errors)){
+			if (window.validatejs.isEmpty(errors)) {
 				return false;
 			}
 			return true;
@@ -238,6 +249,8 @@ const formMixin = {
 				this.$root.$emit('can-not-submit', this);
 				return;
 			}
+			this.$lqForm.removeErrors(this.formName);
+			
 			await this.validate();
 			
 			if (this.hasError()) {
@@ -302,6 +315,12 @@ const formMixin = {
 		},
 		canSubmit: function() {
 			return this.isReady && !this.isSubmiting;
+		}
+	},
+	watch: {
+		name: function() {
+			this.setup();
+			this.forceRerender();
 		}
 	}
 }

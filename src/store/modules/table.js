@@ -1,6 +1,6 @@
 import helper from 'vuejs-object-helper';
-const tableFormSuffix = '_lq_table_form';
-import { lqFormHelper } from '../../utils/formhelper';
+const tableFormSuffix = '_list';
+import { formHelper as lqFormHelper } from '../../utils/formhelper';
 const Formhelper = new lqFormHelper(null);
 
 let _call_back = {};
@@ -12,26 +12,19 @@ let _call_back = {};
  * @param {String} tableName 
  * @param {Boolean} shouldDeleteAllData, if true then system will delete all data before adding the new data 
  */
-function fetch(commit, dispatch, request, tableName, state) {
+function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, page) {
 
     const data_key  = state[tableName].settings.data_key;
     const total_key  = state[tableName].settings.total_key;
-    const current_page_key  = state[tableName].settings.current_page_key;
     const type  = state[tableName].settings.type;
     const requesting  = state[tableName].requesting;
     if (requesting) {
-        _call_back[tableName] = () => { fetch(commit, dispatch, request, tableName, state) }
+        _call_back[tableName] = () => { fetch(commit, dispatch, request, tableName, state, shouldDataDelete) }
         return ;
     }
     commit('updateRequestingStatus', {tableName, status: true});
     return request()
         .then((response) => {
-                /**
-             * Deleting the all data when page changed.
-             */
-            
-            if(shouldDeleteAllData)
-                commit('deleteAllData', {tableName});
             /**
              * Changing the request status as false
              */
@@ -40,8 +33,9 @@ function fetch(commit, dispatch, request, tableName, state) {
              * Geting the data, current_page  veriable value from the serevr response.
              */
     
-            const current_page = current_page_key ? helper.getProp(response, current_page_key , 1) : 1;
-            const data = helper.getProp(response, data_key, []);
+            // const current_page = current_page_key ? helper.getProp(response, current_page_key , 1) : 1;
+            const current_page = page;
+            const data = data_key ? helper.getProp(response, data_key, []): response;
 
             /**
              * Current page is greater than 1 and doesn't have data before request resolve then move to previous page
@@ -59,7 +53,9 @@ function fetch(commit, dispatch, request, tableName, state) {
                 const total = total_key ? helper.getProp(response, total_key , data.length): data.length;
                 commit('updateSetting', {tableName, key: 'total', value: total} );
             }
-
+            if (shouldDataDelete) {
+                commit('deleteAllData', {tableName});
+            }
             /**
              * Set the given page data 
              */
@@ -92,7 +88,7 @@ function fetch(commit, dispatch, request, tableName, state) {
 
 const getters = {
 
-    formValue: (state, getters, rootState, rootGetters) => (tableName) => {
+    formValues: (state, getters, rootState, rootGetters) => (tableName) => {
         return Formhelper.formData(tableName + tableFormSuffix, rootGetters);
     },
     request: (state, getters, rootState, rootGetters) => (tableName) => {
@@ -110,89 +106,80 @@ const actions = {
     filter({commit, state}, {tableName, changePage}) {
         
         const request = this.getters['table/request'](tableName);
-        if(request) {
-            /**
-             * update previous page value, This will help to display the previous page data till the request resloved.
-             */
-            const current_page = helper.getProp(state,[tableName,'settings', 'prev_page'], 1);
-            commit('updateSetting', {tableName, key: 'prev_page', value:  current_page})
-            /**
-             * Set the current page value 1
-             */
-            if(changePage === undefined || changePage)
-                this.dispatch('form/setElementValue', {formName: tableName + tableFormSuffix, elementName: 'page', value: 1});
-
-            commit('deleteAllData', {tableName});
-            /**
-             * Action to get the first page data
-             */
-            fetch(commit, this.dispatch, request, tableName, state);
+        const page_key = state[tableName].settings.page_key;
+        /**
+         * update previous page value, This will help to display the previous page data till the request resloved.
+         */
+        const formValues =  this.getters['table/formValues'](tableName);
+        const page = formValues[page_key] ? formValues[page_key] : 1;
+        commit('updateSetting', {tableName, key: 'prev_page', value:  page})
+        if (changePage === undefined || changePage) {
+            
+            this.dispatch('form/setElementValue', {formName: tableName + tableFormSuffix, elementName: page_key, value: 1});
         }
-        else {
 
-            throw Error('Request instance is not available.')
-        }
+        // commit('deleteAllData', {tableName});
+        /**
+         * Action to get the first page data
+         */
+        fetch(commit, this.dispatch, request, tableName, state, true, page);
     },
     switchPage({commit, state},  {tableName, page, force}) {
         
         const request = this.getters['table/request'](tableName);
+        const page_key = state[tableName].settings.page_key;
+        const formValues =  this.getters['table/formValues'](tableName);
+        const current_page = formValues[page_key] ? formValues[page_key] : 1;
+        /**
+         * update previous page value, This will help to display the previous page data till the request resloved.
+         */
+        
+        commit('updateSetting', {tableName, key: 'prev_page', value: current_page})
+        /**
+         * Updating the current page value
+         */
+        this.dispatch('form/setElementValue', {formName: tableName + tableFormSuffix, elementName: page_key, value: page});         
 
-        if (request) {
-            /**
-             * update previous page value, This will help to display the previous page data till the request resloved.
-             */
-            const current_page = helper.getProp(state,[tableName,'settings', 'prev_page'], 1);
-            commit('updateSetting', {tableName, key: 'prev_page', value:  current_page})
+        /**
+         * Force is true, removing the data from data.
+         */
+        // if (force) commit('deleteAllData', {tableName});
 
-            /**
-             * Updating the current page value
-             */
-            this.dispatch('form/setElementValue', {formName: tableName + tableFormSuffix, elementName: 'page', value: page});         
+        /**
+         * if this Page data is already in state and don't need to get the data from server
+         */
+        const has_pages = this.getters['table/hasPages'](tableName);
+        // console.log('has_pages', has_pages, page)
+        if ( has_pages.includes('page_' + page) && !force) return;
 
-            /**
-             * Force is true, removing the data from data.
-             */
-            if (force) commit('deleteAllData', {tableName});
-
-            /**
-             * if this Page data is already in state and don't need to get the data from server
-             */
-            const has_pages = this.getters['table\hasPages'](tableName);
-            if (!has_pages.includes('page_' + current_page) && !force) return;
-
-            /**
-             * Action to get the given page data.
-             */
-            fetch(commit, this.dispatch, request, tableName, state);
-        } else {
-
-            throw Error('Request instance is not available.')
-        }
+        /**
+         * Action to get the given page data.
+         */
+        fetch(commit, this.dispatch, request, tableName, state, force, page);
     },
     changePageSize({commit, state}, {tableName, page_size}) {
         const request = this.getters['table/request'](tableName);
-        if (request) {
-            /**
-             * update previous page value, This will help to display the previous page data till the request resloved.
-             */
-            const current_page = helper.getProp(state,[tableName,'settings', 'prev_page'], 1);
-            commit('updateSetting', {tableName, key: 'prev_page', value:  current_page})
+        const page_size_key = state[tableName].settings.page_size_key;
+        const page_key = state[tableName].settings.page_key;
+        const formValues =  this.getters['table/formValues'](tableName);
+        const page = formValues[page_key] ? formValues[page_key] : 1;
+        /**
+         * update previous page value, This will help to display the previous page data till the request resloved.
+         */
+        
+        commit('updateSetting', {tableName, key: 'prev_page', value: page})
 
-            /**
-             * updating the page size and set the current page value 1
-             */
-            this.dispatch('form/setElementValue', {formName: tableName +tableFormSuffix, elementName: 'page', value: 1});
-            this.dispatch('form/setElementValue', {formName: tableName +tableFormSuffix, elementName: 'page_size', value: page_size});
-            
-            /**
-             * Action to get the first page data on base of page size.
-             */
-            fetch(commit, this.dispatch, request, tableName, state);
-        }
-        else {
+        /**
+         * updating the page size and set the current page value 1
+         */
+        this.dispatch('form/setElementValue', {formName: tableName + tableFormSuffix, elementName: page_key, value: 1});
+        this.dispatch('form/setElementValue', {formName: tableName + tableFormSuffix, elementName: page_size_key, value: page_size});
+        // commit('deleteAllData', {tableName});
 
-            throw Error('Request instance is not available.')
-        }
+        /**
+         * Action to get the first page data on base of page size.
+         */
+        fetch(commit, this.dispatch, request, tableName, state, true, page);
     },
     /**
      * Action to change the requesting status
@@ -214,20 +201,15 @@ const actions = {
      */
     get({commit, state}, {tableName}) {
         const request = this.getters['table/request'](tableName);
-        if (request) {
-            /**
-             * Removing the data from data.
-             */
-            commit('deleteAllData', {tableName});
+        /**
+         * Removing the data from data.
+         */
+        commit('deleteAllData', {tableName});
 
-            /**
-             * Fetching the data from server
-             */
-            fetch(commit, this.dispatch, request, tableName, state);
-
-        } else {
-            throw Error('Request instance is not available.')
-        }
+        /**
+         * Fetching the data from server
+         */
+        fetch(commit, this.dispatch, request, tableName, state, true, 1);
     },
 
     /**
@@ -247,7 +229,10 @@ const actions = {
         commit('deleteAllData', {tableName});
     },
     updateRow({commit }, {tableName, row, primaryKey}) {
-        commit('updateDataRow', {tableName, row, primaryKey});
+        commit('updateOrDeleteDataRow', {tableName, row, primaryKey});
+    },
+    deleteRow({ commit }, { tableName, row, primaryKey }) {
+        commit('updateOrDeleteDataRow', { tableName, row, primaryKey, willdelete: true });
     }
 }
 
@@ -274,7 +259,11 @@ const mutations = {
      * mentain the index of page which data we have already in state.
      */
     addLoadedPage(state, {tableName, page}) {
-        helper.pushProp(state, [tableName, 'settings', 'has_pages'], 'page_'+page);
+        const has_pages = helper.getProp(state, [tableName, 'settings', 'has_pages']);
+        const newPage = 'page_' + page;
+        if (!has_pages || !has_pages.includes(newPage)) {
+            helper.pushProp(state, [tableName, 'settings', 'has_pages'], newPage);
+        }
     },
 
     /**
@@ -318,7 +307,7 @@ const mutations = {
      * @param {Object} state 
      * @param {Object} param1 
      */
-    updateDataRow(state, {tableName, row, primaryKey}) {
+    updateOrDeleteDataRow(state, { tableName, row, primaryKey, willdelete }) {
         const tablePrimaryKey = helper.getProp(state, [tableName, 'settings', 'primary_key'], null);
         const type = helper.getProp(state, [tableName, 'settings', 'type'], 'table');
         primaryKey = primaryKey ? primaryKey : (tablePrimaryKey ? tablePrimaryKey : 'id') ;
@@ -329,12 +318,14 @@ const mutations = {
         if (type == 'table') {
             const pages = helper.getProp(state, [tableName, 'settings', 'has_pages'], []);
             pages.map((page) => {
-                
                 const pageData = helper.getProp(state, [tableName, 'data', page], []);
                 pageData.map((dataRow, dataIndex) => {
-
-                    if (row[primaryKey] === dataRow[primaryKey]){
-                        helper.setProp(state, [tableName, 'data', page, dataIndex], row);
+                    if (row[primaryKey] === dataRow[primaryKey]) {
+                        if (willdelete) {
+                            helper.deleteProp(state, [tableName, 'data', page, dataIndex]);
+                        } else {
+                            helper.setProp(state, [tableName, 'data', page, dataIndex], row);
+                        }
                     }
                 })
             })
@@ -345,8 +336,12 @@ const mutations = {
         else {
             const pageData = helper.getProp(state, [tableName, 'data' ], []);
             pageData.map((dataRow, dataIndex) => {
-                if (row[primaryKey] === dataRow[primaryKey]){
-                    helper.setProp(state, [tableName, 'data', dataIndex], row);
+                if (row[primaryKey] === dataRow[primaryKey]) {
+                    if (willdelete) {
+                        helper.deleteProp(state, [tableName, 'data', dataIndex]);
+                    } else {
+                        helper.setProp(state, [tableName, 'data', dataIndex], row);
+                    }
                 }
             })
         }

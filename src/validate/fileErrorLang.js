@@ -17,4 +17,5 @@ export default {
     min:  'You need to  select atleast %{min} File(s).',
     acceptedFiles: 'Invalid file. Acceptable extensions are %{acceptedFiles}',
     required: 'File is required.',
+    crop: 'Image should be croped.'
 }

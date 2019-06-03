@@ -35,9 +35,10 @@ function fileValidation (value, rules, elementName, values, options) {
         exactImageDimensions,
         required,
         message,
-        max
+        max,
+        crop
     } = rules;
-    const {file, id} = value;
+    const {file, id, cropped} = value;
 
     let maxFileSizeBytes = maxFileSize ? maxFileSize*1024*1204 : null;
     let minFileSizeBytes = minFileSize ? minFileSize*1024*1204 : null;	
@@ -52,15 +53,13 @@ function fileValidation (value, rules, elementName, values, options) {
         }
         let errors = [];
 
-        if(max ) {
-            
+        if (max) {
             let nameArr = elementName.split('\.');
-            let valueIndex = parseInt(nameArr.splice(nameArr.length-1, 1)[0])+1;
+            let valueIndex = parseInt(nameArr.splice(nameArr.length - 1, 1)[0])+1;
             if(max && valueIndex > max) {
                 errors.push(generateErrorMessage('max', {max}, message));
             }
         }
-
         let fReader = new FileReader();
 
         fReader.onload = function(e) {
@@ -88,9 +87,10 @@ function fileValidation (value, rules, elementName, values, options) {
              * Checking File type is Image
              */
             if(isImage(e.target.result)) {
-
+                if (crop && !id && !cropped) {
+                    errors.push(generateErrorMessage('crop', null, message));
+                }
                 let img = new Image();
-
                 img.onload = function(imgEvent) { 
                     const imgE = imgEvent.width ? imgEvent :  imgEvent.path[0];
                     /**

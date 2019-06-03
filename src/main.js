@@ -10,7 +10,10 @@ import lqElementMixin from './mixins/elementMixin';
 import lqFormMixin from './mixins/formMixin';
 import lqPermissionMixin from './mixins/permissionMixin';
 import lqFileMixin from './mixins/fileMixin';
-
+/**
+ * LQ Form Components 
+ */
+import lqList from '@/components/List'
 /**
  * Form Modules
  */
@@ -19,6 +22,7 @@ import lqFormModule from './store/modules/form';
  * Form Helper Class
  */
 import formHelper, {formHelper as lqFormHelper} from './utils/formhelper';
+import rTable from './utils/lqTable';
 
 /**
  * Validate Libraray to validate the form Element.
@@ -40,6 +44,8 @@ export default {
     install (Vue, options) {
         options.store.registerModule('form', lqFormModule);
         Vue.use(formHelper, {store: options.store});
+        Vue.use(rTable, {store: options.store});
+        Vue.component('lq-list', lqList);
     }
 }
 
