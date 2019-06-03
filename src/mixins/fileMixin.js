@@ -31,9 +31,14 @@ const fileMixin = {
             required: true
         }
     },
-    data: function () {
-        return {
-            validateArrayIndex: true,
+    // data: function () {
+    //     return {
+    //         validateArrayIndex: true,
+    //     }
+    // },
+    computed: {
+        validateArrayIndex: function() {
+            return window.validatejs.isEmpty(this.LQElement) ? false : true;
         }
     },
     methods: {

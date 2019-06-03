@@ -26,6 +26,10 @@ export function generateErrorMessage (type, attribues, message) {
  */
 function fileValidation (value, rules, elementName, values, options) {
     
+    // if (!helper.isObject(value)) {
+    //     return new Promise(function(resolve) {resolve('')});
+    // }
+
     const {
         maxFileSize,
         minFileSize,
@@ -46,7 +50,7 @@ function fileValidation (value, rules, elementName, values, options) {
     
 
     return new Promise(function(resolve) {
-        
+
         if (!file && !id && required) {
             resolve([generateErrorMessage('required', {}, message)]);
             return;

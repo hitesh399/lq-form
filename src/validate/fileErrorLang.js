@@ -16,6 +16,6 @@ export default {
     max:  'You can only select %{max} File(s).',
     min:  'You need to  select atleast %{min} File(s).',
     acceptedFiles: 'Invalid file. Acceptable extensions are %{acceptedFiles}',
-    required: 'File is required.',
+    required: 'can\'t be blank',
     crop: 'Image should be croped.'
 }
