@@ -18,6 +18,7 @@ import lqList from '@/components/List'
  * Form Modules
  */
 import lqFormModule from './store/modules/form';
+import lqTableModule from './store/modules/table';
 /**
  * Form Helper Class
  */
@@ -43,6 +44,7 @@ export default {
     // the first argument, along with possible options
     install (Vue, options) {
         options.store.registerModule('form', lqFormModule);
+        options.store.registerModule('table', lqTableModule);
         Vue.use(formHelper, {store: options.store});
         Vue.use(rTable, {store: options.store});
         Vue.component('lq-list', lqList);
