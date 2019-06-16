@@ -35,7 +35,8 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
     
             // const current_page = current_page_key ? helper.getProp(response, current_page_key , 1) : 1;
             const current_page = page;
-            const data = data_key ? helper.getProp(response, data_key, []): response;
+            let data = data_key ? helper.getProp(response, data_key, []) : response;
+            data = data ? data : []; 
 
             /**
              * Current page is greater than 1 and doesn't have data before request resolve then move to previous page
