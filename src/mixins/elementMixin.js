@@ -82,12 +82,6 @@ const formElementMix = {
 
       return helper.getProp(this.$store.state.form, this.formName+'.initialize_values.'+ this.id, null);
     },
-    /**
-     * To get the element Value
-     */
-    value: function() {
-      return helper.getProp(this.$store.state.form,`${this.formName}.values.${this.id}`);
-    },
     name: function () {
       return this.id.split('.').map(function(item, index)  { return index >0 ? '['+item+']': item  }).join('');
     },
@@ -155,7 +149,7 @@ const formElementMix = {
     getValue: function (defulatValue) {
 
       defulatValue = defulatValue !== undefined ? defulatValue : null;
-      return this.value || this.value === undefined ? this.value : defulatValue;
+      return this.LQElement || this.LQElement === undefined ? this.LQElement : defulatValue;
     },
 
     setValue: function (value, informToroot= true, checkValidation = true) {
@@ -295,6 +289,7 @@ const formElementMix = {
      * @param {Object} event
      */
     emitNativeEvent: function(event) {
+      if (!event) {return}
       this.$emit(event.type, event, this.LQElement);
       /**
        * Check the Validation

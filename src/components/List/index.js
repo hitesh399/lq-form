@@ -4,7 +4,7 @@ import helper from 'vuejs-object-helper';
 
 export default Vue.extend({
     mixins: [rForm],
-    name: 'r-form-list',
+    name: 'r-list',
     render: function (createElement) {
         let props = this.$attrs;
         return createElement(this.tag, {
