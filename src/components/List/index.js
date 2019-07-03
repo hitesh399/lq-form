@@ -103,7 +103,8 @@ export default Vue.extend({
             /**
              * Define Form Namne
              */
-            this.formName = this.name + '_list';
+            this.formName = this.name;
+            
             /**
              * Add Form initial setting in state
              */

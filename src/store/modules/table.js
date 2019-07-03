@@ -1,5 +1,5 @@
 import helper from 'vuejs-object-helper';
-const tableFormSuffix = '_list';
+const tableFormSuffix = '';
 import { formHelper as lqFormHelper } from '../../utils/formhelper';
 const Formhelper = new lqFormHelper(null);
 
