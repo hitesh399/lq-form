@@ -17,7 +17,7 @@ export default Vue.extend({
 
     methods: {
         setup: function() {
-            this.formName = this.name;
+            this.formName = this.name + '_list';
         }
     }
 })
