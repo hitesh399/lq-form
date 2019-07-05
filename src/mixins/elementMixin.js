@@ -280,6 +280,7 @@ const formElementMix = {
           })
       });
       changeReadyStatus ? this.ready(true) : null;
+      this.$root.$emit('element-validated', this.id, this.formName);
       this.validatingStatus(false);
       return test;
     },
