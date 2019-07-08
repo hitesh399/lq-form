@@ -235,7 +235,7 @@ const formMixin = {
 			elementNames.forEach(elementName => {
 				let test = fields[elementName].test;
 				if(typeof test === "function") {
-					tests.push(test(false));
+					tests.push(test(false, false));
 				}
 			});
 			return Promise.all(tests).then(() => {

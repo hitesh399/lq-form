@@ -72,6 +72,9 @@ const formElementMix = {
     field: function () {
       return helper.getProp(this.$store.state.form, [this.formName, 'fields', this.id], {});
     },
+    touch: function () {
+      return helper.getProp(this.$store.state.form, [this.formName, 'fields', this.id, 'touch'], false);
+    },
     validating: function() {
       return this.field.validating ? true : false;
     },
@@ -236,9 +239,12 @@ const formElementMix = {
      * Validate the element.
      * @param {Boolean} changeReadyStatus
      */
-    validate: async function (changeReadyStatus = true) {
+    validate: async function (changeReadyStatus = true, whenTouched = true) {
       if(!this.rules) {
         this.removeAllErrors();
+        return;
+      }
+      if (!this.touch && whenTouched) {
         return;
       }
       if (this.validating && this.validationCallback === null) {
