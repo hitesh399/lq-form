@@ -1,5 +1,4 @@
 import helper from 'vuejs-object-helper';
-// const validate = require('validate.js');
 const _  = require('lodash');
 const formElementMix = {
   props: {
@@ -22,12 +21,10 @@ const formElementMix = {
     disabled: Boolean,
   },
   computed: {
-
     /**
      * To get the Element Error Message.
      */
     error: function () {
-
       return helper.getProp(this.$store.state.form, [this.formName, 'errors', this.id], null);
     },
     /**
@@ -37,7 +34,7 @@ const formElementMix = {
       return helper.getProp(this.$store.state.form, [this.formName, 'errors'], null);
     },
     simpleName: function() {
-      return this.id.replaceAll(new RegExp("\.[0-9]+\."),'.*.');
+      return this.id.replaceAll(new RegExp("\.[0-9]+\."), '.*.');
     },
     /**
      * Get all error of element, if there is any validation rule in nested data.
@@ -82,7 +79,6 @@ const formElementMix = {
      * TO get the element initial value
      */
     initializevalue: function () {
-
       return helper.getProp(this.$store.state.form, this.formName+'.initialize_values.'+ this.id, null);
     },
     name: function () {
@@ -111,7 +107,7 @@ const formElementMix = {
       validationCallback: null,
       makeInItVal: undefined,
       asyncValidation: false,
-      rules: null,
+      lqElRules: null,
     }
   },
   inject: ['lqForm'],
@@ -141,7 +137,7 @@ const formElementMix = {
     /**
      * Get Validation rule from form class.
      */
-    this.rules = this.lqForm.rules ? helper.getProp(this.lqForm.rules, this.simpleName, null) : null;
+    this.lqElRules = this.lqForm.rules ? helper.getProp(this.lqForm.rules, this.simpleName, null) : null;
   },
 
   methods: {
@@ -157,7 +153,7 @@ const formElementMix = {
 
     setValue: function (value, informToroot= true, checkValidation = true) {
 
-      if(!this.rules && this.error){
+      if(!this.lqElRules && this.error){
         this.removeError();
       }
       
@@ -179,7 +175,7 @@ const formElementMix = {
       /**
        * Check validation rules.
        */
-      if(checkValidation && this.validateOnEvent === 'change'){
+      if(checkValidation && this.validateOnEvent === 'change') {
         this.validate();
       }
     },
@@ -240,7 +236,7 @@ const formElementMix = {
      * @param {Boolean} changeReadyStatus
      */
     validate: async function (changeReadyStatus = true, whenTouched = true) {
-      if(!this.rules) {
+      if(!this.lqElRules) {
         this.removeAllErrors();
         return;
       }
@@ -264,11 +260,11 @@ const formElementMix = {
 
       if (this.validateArrayIndex && window.validatejs.isArray(this.LQElement)) {
         this.LQElement.forEach((singleVal, index) => {
-          validation_rules[this.id + '\\.' + index] = this.rules;
+          validation_rules[this.id + '\\.' + index] = this.lqElRules;
           element_values[this.id + '.' + index] = singleVal;
         })
       } else {
-        validation_rules[this.id] = this.rules;
+        validation_rules[this.id] = this.lqElRules;
       }
       element_values[this.id] = this.LQElement;
       const test = await new Promise((resolve) => {
