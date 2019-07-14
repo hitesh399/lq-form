@@ -24,7 +24,7 @@ const formElementMix = {
     /**
      * To get the Element Error Message.
      */
-    error: function () {
+    elError: function () {
       return helper.getProp(this.$store.state.form, [this.formName, 'errors', this.id], null);
     },
     /**
@@ -153,7 +153,7 @@ const formElementMix = {
 
     setValue: function (value, informToroot= true, checkValidation = true) {
 
-      if(!this.lqElRules && this.error){
+      if(!this.lqElRules && this.elError){
         this.removeError();
       }
       

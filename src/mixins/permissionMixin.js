@@ -15,50 +15,50 @@ export default {
     },
 
     /**
-		 * is need to check the form element permission ?
-		 */
-		shouldCheckPermission: function() {
-			return this.formPermission && this.formPermission.fields && this.formPermission.fields.length && this.formPermission.limitations && this.formPermission.limitations.field_selection ? true : false;
-    },
+	 * is need to check the form element permission ?
+	 */
+	shouldCheckPermission: function() {
+		return this.formPermission && this.formPermission.fields && this.formPermission.fields.length && this.formPermission.limitations && this.formPermission.limitations.field_selection ? true : false;
+	},
 
     /**
-		 * To check the Authority to read and write the element.
-		 */
-		hasAccess: function () {
-			if(this.shouldCheckPermission) {
-				const field = this.getPermittedField;
-				if(this.formPermission.limitations.field_selection === 'only') {
-					return field ? true : false;
-				}
-				else {
-					field && field.authority !== 'read' ? false : true;
-				}
+	 * To check the Authority to read and write the element.
+	 */
+	hasAccess: function () {
+		if(this.shouldCheckPermission) {
+			const field = this.getPermittedField;
+			if(this.formPermission.limitations.field_selection === 'only') {
+				return field ? true : false;
 			}
-			return true;
+			else {
+				field && field.authority !== 'read' ? false : true;
+			}
+		}
+		return true;
     },
-    /**
+		/**
 		 * To find the field authority is that read | write | hide
 		 */
 		fieldAuthority: function () {
-      const field = this.getPermittedField;
-			return field ? field.authority : null;
+		const field = this.getPermittedField;
+		return field ? field.authority : null;
     },
     
     /**
-		 * To check that form permission have the current field information.
-		 */
-		getPermittedField: function () {
-			let data = null;
-			const client_field = this[this.elementIdKey].replaceAll(new RegExp("\.[0-9]+\."),'.*.');
-			if(this.formPermission && this.formPermission.fields && this.formPermission.fields.length) {
-				this.formPermission.fields.map((field) => {
-					if(field.client_field === client_field) {
-						data = field;
-					}
-				})
-			}
-			return data;
-		},
+	 * To check that form permission have the current field information.
+	 */
+	getPermittedField: function () {
+		let data = null;
+		const client_field = this[this.elementIdKey].replaceAll(new RegExp("\.[0-9]+\."),'.*.');
+		if(this.formPermission && this.formPermission.fields && this.formPermission.fields.length) {
+			this.formPermission.fields.map((field) => {
+				if(field.client_field === client_field) {
+					data = field;
+				}
+			})
+		}
+		return data;
+	},
   },
   
   /**
