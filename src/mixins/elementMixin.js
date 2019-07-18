@@ -1,5 +1,5 @@
 import helper from 'vuejs-object-helper';
-import { cloneDeep } from 'lodash/core'
+import cloneDeep from 'lodash/cloneDeep'
 const formElementMix = {
   props: {
     id: {

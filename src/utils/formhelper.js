@@ -1,5 +1,5 @@
 // const validate = require('validate.js');
-import { cloneDeep } from 'lodash/core'
+import cloneDeep from 'lodash/cloneDeep'
 import helper from 'vuejs-object-helper';
 
 export default {
