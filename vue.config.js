@@ -1,7 +1,10 @@
-// module.exports = {
-//     configureWebpack: {
-//       output: {
-//         libraryExport: 'vuex-lq-form'
-//       }
-//     }
-//   }
+// vue.config.js
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
+module.exports = {
+    configureWebpack: {
+      plugins: [
+        new BundleAnalyzerPlugin()
+      ]
+    }
+  }
