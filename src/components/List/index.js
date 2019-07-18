@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import rForm from '../../mixins/formMixin';
 import helper from 'vuejs-object-helper';
+const _ = require('lodash')
 
 export default Vue.extend({
     mixins: [rForm],
@@ -171,9 +172,14 @@ export default Vue.extend({
         this.$root.$off(this.formName + '_changed');
     },
     watch: {
-        staticData: function (newStaticData, oldStaticData) {
-            this.$store.dispatch('table/addStaticData', {tableName: this.name, data: newStaticData});
-            this.refresh(true);
+        staticData: {
+            handler (newStaticData, oldStaticData) {
+                if (!_.isEqual(newStaticData, oldStaticData)) {
+                    this.$store.dispatch('table/addStaticData', {tableName: this.name, data: newStaticData});
+                    this.refresh(true);
+                }
+            },
+            deep: true
         }
     }
 })
