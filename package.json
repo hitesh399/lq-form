@@ -1,6 +1,6 @@
 {
   "name": "lq-form",
-  "version": "0.1.31",
+  "version": "0.1.32",
   "private": false,
   "scripts": {
     "serve": "vue-cli-service serve src/play/index.js",
@@ -10,7 +10,7 @@
     "update-plugins": "node plugins_update",
     "test:unit": "vue-cli-service test:unit"
   },
-  "main": "dist/lq.form.common.js",
+  "main": "dist/lq.form.umd.js",
   "dependencies": {
     "axios": "^0.19.0",
     "lodash": "^4.17.11",
