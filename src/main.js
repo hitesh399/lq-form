@@ -13,8 +13,8 @@ import lqFileMixin from './mixins/fileMixin';
 /**
  * LQ Form Components 
  */
-import lqList from '@/components/List'
-import lqListFilter from '@/components/List/Filter'
+import lqList from './components/List'
+import lqListFilter from './components/List/Filter'
 /**
  * Form Modules
  */
