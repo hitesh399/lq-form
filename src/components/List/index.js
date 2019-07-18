@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import rForm from '../../mixins/formMixin';
 import helper from 'vuejs-object-helper';
-const _ = require('lodash')
+import { isEqual } from 'lodash/core'
 
 export default Vue.extend({
     mixins: [rForm],
@@ -155,9 +155,9 @@ export default Vue.extend({
         changePageSize: function (page_size) {
             this.$lqTable.changePageSize(this.name, page_size);
         },
-        next: function() {
+        next: function(sendOffset = false, force = false) {
             const page = this.currentPage + 1;
-            this.$lqTable.switchPage(this.name, page);
+            this.$lqTable.switchPage(this.name, page, sendOffset, force);
         },
         filter: function() {
             this.$lqTable.filter(this.name);
@@ -179,7 +179,7 @@ export default Vue.extend({
     watch: {
         staticData: {
             handler (newStaticData, oldStaticData) {
-                if (!_.isEqual(newStaticData, oldStaticData)) {
+                if (!isEqual(newStaticData, oldStaticData)) {
                     this.$store.dispatch('table/addStaticData', {tableName: this.name, data: newStaticData});
                     this.refresh(true);
                 }

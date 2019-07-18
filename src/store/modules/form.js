@@ -1,5 +1,5 @@
 import helper from 'vuejs-object-helper';
-const _  = require('lodash');
+import { cloneDeep } from 'lodash/core'
 
 const state = {
 	
@@ -105,7 +105,7 @@ const actions = {
 	resetForm({commit, state}, {formName}) {
 
 		const initialize_values = helper.getProp(state, [formName, 'initialize_values'], {});
-		commit('saveValues', {formName, values: _.cloneDeep(initialize_values)});
+		commit('saveValues', {formName, values: cloneDeep(initialize_values)});
 	},
 	
 	/**
@@ -162,8 +162,8 @@ const mutations = {
 	 */
 	saveInitializeValues(state, {formName, values}) {
 		
-		helper.setProp(state, [formName, 'initialize_values'], _.cloneDeep(values), true);
-		helper.setProp(state, [formName, 'values'], _.cloneDeep(values), true);
+		helper.setProp(state, [formName, 'initialize_values'], cloneDeep(values), true);
+		helper.setProp(state, [formName, 'values'], cloneDeep(values), true);
 	},
 
 	saveValues(state, {formName, values}) {

@@ -1,5 +1,5 @@
 // const validate = require('validate.js');
-const _  = require('lodash');
+import { cloneDeep } from 'lodash/core'
 import helper from 'vuejs-object-helper';
 
 export default {
@@ -164,7 +164,7 @@ export  function formHelper (store ) {
      */
     this.formData = function(formName, getters) {
         getters = getters ? getters : store.getters;
-        const formData = _.cloneDeep(getters['form/values'](formName));
+        const formData = cloneDeep(getters['form/values'](formName));
         let settings = getters['form/settings'](formName);
         let fields =  getters['form/fields'](formName);
         let transformKeys = settings.transformKeys ? settings.transformKeys : null;

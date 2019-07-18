@@ -1,6 +1,5 @@
 import helper from 'vuejs-object-helper';
-const _  = require('lodash');
-// const validateJs = require('validate.js');
+import { cloneDeep } from 'lodash/core'
 
 const formMixin = {
 
@@ -78,7 +77,7 @@ const formMixin = {
 
 		formValues: function () {
 
-			return _.cloneDeep(helper.getProp(this.$store.state.form,`${this.formName}.values`, {}));
+			return cloneDeep(helper.getProp(this.$store.state.form,`${this.formName}.values`, {}));
 		},
 		formInitialvalues: function () {
 

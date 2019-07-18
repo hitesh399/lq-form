@@ -94,8 +94,11 @@ const getters = {
     formValues: (state, getters, rootState, rootGetters) => (tableName) => {
         return Formhelper.formData(tableName + tableFormSuffix, rootGetters);
     },
-    request: (state, getters, rootState, rootGetters) => (tableName) => {
-        const static_data = helper.getProp(state, [tableName, 'settings', 'static_data'], {});
+    request: (state, getters, rootState, rootGetters) => (tableName, offset) => {
+        let static_data = helper.getProp(state, [tableName, 'settings', 'static_data'], {});
+        if (offset !== false) {
+            static_data.offset = offset
+        }
         return () => Formhelper.submit(tableName + tableFormSuffix, static_data, false, rootGetters);
     },
     hasPages: (state) => (tableName) => {
@@ -127,9 +130,10 @@ const actions = {
          */
         fetch(commit, this.dispatch, request, tableName, state, true, page);
     },
-    switchPage({commit, state},  {tableName, page, force}) {
-        
-        const request = this.getters['table/request'](tableName);
+    switchPage({commit, state},  {tableName, page, sendOffset, force}) {
+        const total_loaded_data = state[tableName].data ? state[tableName].data : []
+        const offset = sendOffset && state[tableName].settings.type === 'list' ? total_loaded_data.length : false
+        const request = this.getters['table/request'](tableName, offset);
         const page_key = state[tableName].settings.page_key;
         const formValues =  this.getters['table/formValues'](tableName);
         const current_page = formValues[page_key] ? formValues[page_key] : 1;

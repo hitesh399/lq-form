@@ -1,5 +1,5 @@
 import helper from 'vuejs-object-helper';
-const _  = require('lodash');
+import { cloneDeep } from 'lodash/core'
 const formElementMix = {
   props: {
     id: {
@@ -88,7 +88,7 @@ const formElementMix = {
      * Get form values
      */
     formValues: function () {
-      return _.cloneDeep(helper.getProp(this.$store.state.form,`${this.formName}.values`, {}));
+      return cloneDeep(helper.getProp(this.$store.state.form,`${this.formName}.values`, {}));
     },
     LQElement: {
 

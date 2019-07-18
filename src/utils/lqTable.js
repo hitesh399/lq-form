@@ -9,8 +9,8 @@ export default {
 
 export function helper(store) {
 
-    this.switchPage =  function (tableName, page) {
-        store.dispatch('table/switchPage',{tableName, page})
+    this.switchPage =  function (tableName, page, sendOffset, force) {
+        store.dispatch('table/switchPage',{tableName, page, sendOffset, force})
     }
     this.changePageSize = function (tableName, page_size) {
         store.dispatch('table/changePageSize',{tableName, page_size})
