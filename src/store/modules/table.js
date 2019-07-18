@@ -75,6 +75,8 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
                 _call_back[tableName]()
                 delete _call_back[tableName]
             }
+            
+            return response;
 
         }).catch((e) => {
             /**
@@ -210,7 +212,7 @@ const actions = {
         /**
          * Fetching the data from server
          */
-        fetch(commit, this.dispatch, request, tableName, state, true, 1);
+        return fetch(commit, this.dispatch, request, tableName, state, true, 1);
     },
 
     /**

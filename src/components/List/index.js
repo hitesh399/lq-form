@@ -135,7 +135,12 @@ export default Vue.extend({
             /**
              * Request to server
              */
-            this.$store.dispatch('table/get', {tableName: this.name});
+            const response = this.$store.dispatch('table/get', {tableName: this.name});
+            if (response) {
+                response.then((response) => {
+                    this.$emit('initial-data', response)
+                })
+            }
 
             /**
              * Form Element value changes.
