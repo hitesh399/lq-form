@@ -1,6 +1,8 @@
 import helper from 'vuejs-object-helper';
 const tableFormSuffix = '';
 import { formHelper as lqFormHelper } from '../../utils/formhelper';
+import cloneDeep from 'lodash/cloneDeep'
+
 const Formhelper = new lqFormHelper(null);
 
 let _call_back = {};
@@ -95,7 +97,14 @@ const getters = {
         return Formhelper.formData(tableName + tableFormSuffix, rootGetters);
     },
     request: (state, getters, rootState, rootGetters) => (tableName, offset) => {
-        let static_data = helper.getProp(state, [tableName, 'settings', 'static_data'], {});
+        let static_data = cloneDeep(
+            helper.getProp(
+                state, 
+                [tableName, 'settings', 'static_data'], 
+                {}
+            )
+        );
+
         if (offset !== false) {
             static_data.offset = offset
         }
