@@ -104,8 +104,7 @@ const getters = {
                 {}
             )
         );
-
-        if (offset !== false) {
+        if (offset !== false && offset !== undefined) {
             static_data.offset = offset
         }
         return () => Formhelper.submit(tableName + tableFormSuffix, static_data, false, rootGetters);
