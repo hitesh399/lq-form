@@ -117,10 +117,9 @@ const actions = {
          * update previous page value, This will help to display the previous page data till the request resloved.
          */
         const formValues =  this.getters['table/formValues'](tableName);
-        const page = formValues[page_key] ? formValues[page_key] : 1;
+        let page = formValues[page_key] ? formValues[page_key] : 1;
         commit('updateSetting', {tableName, key: 'prev_page', value:  page})
-        if (changePage === undefined || changePage) {
-            
+        if (changePage === undefined || changePage) {            
             this.dispatch('form/setElementValue', {formName: tableName + tableFormSuffix, elementName: page_key, value: 1});
         }
 
@@ -162,7 +161,7 @@ const actions = {
         /**
          * Action to get the given page data.
          */
-        fetch(commit, this.dispatch, request, tableName, state, force, page);
+        fetch(commit, this.dispatch, request, tableName, state, force, current_page);
     },
     changePageSize({commit, state}, {tableName, page_size}) {
         const request = this.getters['table/request'](tableName);
