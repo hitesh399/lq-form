@@ -127,7 +127,7 @@ const actions = {
         /**
          * Action to get the first page data
          */
-        fetch(commit, this.dispatch, request, tableName, state, true, page);
+        return fetch(commit, this.dispatch, request, tableName, state, true, page);
     },
     switchPage({commit, state},  {tableName, page, sendOffset, force}) {
         const total_loaded_data = state[tableName].data ? state[tableName].data : []
@@ -161,7 +161,7 @@ const actions = {
         /**
          * Action to get the given page data.
          */
-        fetch(commit, this.dispatch, request, tableName, state, force, current_page);
+        return fetch(commit, this.dispatch, request, tableName, state, force, current_page);
     },
     changePageSize({commit, state}, {tableName, page_size}) {
         const request = this.getters['table/request'](tableName);
@@ -185,7 +185,7 @@ const actions = {
         /**
          * Action to get the first page data on base of page size.
          */
-        fetch(commit, this.dispatch, request, tableName, state, true, page);
+        return fetch(commit, this.dispatch, request, tableName, state, true, page);
     },
     /**
      * Action to change the requesting status
