@@ -65,8 +65,13 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
             if (type === 'table') {
                 commit('saveData', {tableName, data, page: current_page});
             } else {
-                commit('saveListData', {tableName, data});
+                commit('pushData', {tableName, data});
             }
+            /**
+             * Rest the new Items
+             */
+            dispatch('table/makeAllOld', { tableName })
+
             /**
              * Set the key of loading page,
              * To maintain the record that how many page's data is loaded in state.
@@ -132,7 +137,6 @@ const actions = {
             this.dispatch('form/setElementValue', {formName: tableName + tableFormSuffix, elementName: page_key, value: 1});
         }
 
-        // commit('deleteAllData', {tableName});
         /**
          * Action to get the first page data
          */
@@ -248,6 +252,34 @@ const actions = {
     },
     deleteRow({ commit }, { tableName, row, primaryKey }) {
         commit('updateOrDeleteDataRow', { tableName, row, primaryKey, willdelete: true });
+    },
+    newItems({ commit, state }, { tableName, data }) {
+        const tablePrimaryKey = helper.getProp(state, [tableName, 'settings', 'primary_key'], null);
+        const primaryKey =  tablePrimaryKey ? tablePrimaryKey : 'id';
+        commit('prependData', {  tableName, data });
+        const items = !helper.isArray(data) ? [data] : data;
+        const new_item_ids = items.map((item) => {
+            return item[primaryKey]
+        });
+        let old_ids = helper.getProp(state, [tableName, 'settings', 'new_ids'], []);
+        old_ids = old_ids ? old_ids : [];
+
+        commit('updateSetting', 
+            {
+                tableName, 
+                key: 'new_ids', 
+                value: new_item_ids.concat(old_ids)
+            }
+        );
+    },
+    makeAllOld({ commit }, { tableName }) {
+        commit('updateSetting', 
+            {
+                tableName, 
+                key: 'new_ids', 
+                value: undefined
+            }
+        );
     }
 }
 
@@ -304,8 +336,16 @@ const mutations = {
      * @param {Object} state 
      * @param {Object} param1 
      */
-    saveListData(state, {tableName, data}) {
+    pushData(state, {tableName, data}) {
         helper.pushProp(state, [tableName, 'data' ], data);
+    },
+    /**
+     * To add a page data
+     * @param {Object} state 
+     * @param {Object} param1 
+     */
+    prependData(state, {tableName, data}) {
+        helper.unshiftProp(state, [tableName, 'data' ], data);
     },
 
     /**
