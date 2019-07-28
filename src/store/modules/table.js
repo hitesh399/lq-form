@@ -52,12 +52,18 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
             /**
              * Get the total length of data and set in total key, 
              */
-            if (current_page === 1) {
-                const total = total_key ? helper.getProp(response, total_key , data.length): data.length;
-                commit('updateSetting', {tableName, key: 'total', value: total} );
+            const total_from_server = helper.getProp(response, total_key, null);
+            if (current_page === 1 || total_from_server) {
+                const total = total_key ? total_from_server : data.length;
+                commit('updateSetting', {
+                        tableName, 
+                        key: 'total', 
+                        value: total
+                    } 
+                );
             }
             if (shouldDataDelete) {
-                commit('deleteAllData', {tableName});
+                commit('deleteAllData', { tableName });
             }
             /**
              * Set the given page data 
