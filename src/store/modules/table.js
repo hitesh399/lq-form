@@ -174,7 +174,7 @@ const actions = {
         /**
          * Action to get the given page data.
          */
-        return fetch(commit, this.dispatch, request, tableName, state, force, current_page);
+        return fetch(commit, this.dispatch, request, tableName, state, force, page);
     },
     changePageSize({commit, state}, {tableName, page_size}) {
         const request = this.getters['table/request'](tableName);
