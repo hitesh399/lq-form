@@ -44,7 +44,7 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
              * Current page is greater than 1 and doesn't have data before request resolve then move to previous page
              * So the page does not display blank when switching page. it is usefull when using the pagination.
              */
-            if (current_page > 1 && data.length === 0) {
+            if (current_page > 1 && data.length === 0 && type === 'table') {
                 dispatch('table/switchPage', {tableName, page: current_page -1 });
                 return;
             }
@@ -53,8 +53,8 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
              * Get the total length of data and set in total key, 
              */
             const total_from_server = helper.getProp(response, total_key, null);
-            if (current_page === 1 || total_from_server) {
-                const total = total_key ? total_from_server : data.length;
+            if (total_from_server) {
+                const total = total_from_server ? total_from_server : data.length;
                 commit('updateSetting', {
                         tableName, 
                         key: 'total', 
