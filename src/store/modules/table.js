@@ -211,7 +211,7 @@ const actions = {
         /**
          * Action to get the first page data on base of page size.
          */
-        return fetch(commit, this.dispatch, request, tableName, state, true, page);
+        return fetch(commit, this.dispatch, request, tableName, state, true, 1);
     },
     /**
      * Action to change the requesting status
