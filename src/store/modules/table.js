@@ -54,11 +54,10 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
              */
             const total_from_server = helper.getProp(response, total_key, null);
             if (total_from_server) {
-                const total = total_from_server ? total_from_server : data.length;
                 commit('updateSetting', {
                         tableName, 
                         key: 'total', 
-                        value: total
+                        value: total_from_server
                     } 
                 );
             }
