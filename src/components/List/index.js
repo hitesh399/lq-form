@@ -22,6 +22,7 @@ export default Vue.extend({
             filter: this.filter,
             refresh: this.refresh,
             changePageSize: this.changePageSize,
+            newIds: this.newIds
         }))
     },
     props: {
@@ -94,6 +95,9 @@ export default Vue.extend({
         },
         total: function () {
             return helper.getProp(this.$store.state, ['table', this.name, 'settings', 'total'], 0);
+        },
+        newIds: function () {
+            return helper.getProp(this.$store.state, ['table', this.name, 'settings', 'new_ids'], []);
         },
         requesting: function () {
             return helper.getProp(this.$store.state, ['table', this.name, 'requesting'], false);

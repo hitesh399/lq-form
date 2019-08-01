@@ -36,7 +36,7 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
              */
     
             // const current_page = current_page_key ? helper.getProp(response, current_page_key , 1) : 1;
-            const current_page = page;
+            const current_page = page ? page : 1;
             let data = data_key ? helper.getProp(response, data_key, []) : response;
             data = data ? data : []; 
 
@@ -52,12 +52,18 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
             /**
              * Get the total length of data and set in total key, 
              */
-            if (current_page === 1) {
-                const total = total_key ? helper.getProp(response, total_key , data.length): data.length;
-                commit('updateSetting', {tableName, key: 'total', value: total} );
+            const total_from_server = helper.getProp(response, total_key, null);
+            if (current_page === 1 || total_from_server) {
+                const total = total_key ? total_from_server : data.length;
+                commit('updateSetting', {
+                        tableName, 
+                        key: 'total', 
+                        value: total
+                    } 
+                );
             }
             if (shouldDataDelete) {
-                commit('deleteAllData', {tableName});
+                commit('deleteAllData', { tableName });
             }
             /**
              * Set the given page data 
@@ -65,8 +71,13 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
             if (type === 'table') {
                 commit('saveData', {tableName, data, page: current_page});
             } else {
-                commit('saveListData', {tableName, data});
+                commit('pushData', {tableName, data});
             }
+            /**
+             * Rest the new Items
+             */
+            dispatch('table/makeAllOld', { tableName })
+
             /**
              * Set the key of loading page,
              * To maintain the record that how many page's data is loaded in state.
@@ -127,11 +138,18 @@ const actions = {
         const formValues =  this.getters['table/formValues'](tableName);
         let page = formValues[page_key] ? formValues[page_key] : 1;
         commit('updateSetting', {tableName, key: 'prev_page', value:  page})
-        if (changePage === undefined || changePage) {            
-            this.dispatch('form/setElementValue', {formName: tableName + tableFormSuffix, elementName: page_key, value: 1});
+        if (changePage === undefined || changePage) {         
+            this.dispatch(
+                'form/setElementValue', 
+                {
+                    formName: tableName + tableFormSuffix, 
+                    elementName: page_key, 
+                    value: 1
+                }
+            );
+            page = 1;
         }
 
-        // commit('deleteAllData', {tableName});
         /**
          * Action to get the first page data
          */
@@ -169,7 +187,7 @@ const actions = {
         /**
          * Action to get the given page data.
          */
-        return fetch(commit, this.dispatch, request, tableName, state, force, current_page);
+        return fetch(commit, this.dispatch, request, tableName, state, force, page);
     },
     changePageSize({commit, state}, {tableName, page_size}) {
         const request = this.getters['table/request'](tableName);
@@ -247,6 +265,34 @@ const actions = {
     },
     deleteRow({ commit }, { tableName, row, primaryKey }) {
         commit('updateOrDeleteDataRow', { tableName, row, primaryKey, willdelete: true });
+    },
+    newItems({ commit, state }, { tableName, data }) {
+        const tablePrimaryKey = helper.getProp(state, [tableName, 'settings', 'primary_key'], null);
+        const primaryKey =  tablePrimaryKey ? tablePrimaryKey : 'id';
+        commit('prependData', {  tableName, data });
+        const items = !helper.isArray(data) ? [data] : data;
+        const new_item_ids = items.map((item) => {
+            return item[primaryKey]
+        });
+        let old_ids = helper.getProp(state, [tableName, 'settings', 'new_ids'], []);
+        old_ids = old_ids ? old_ids : [];
+
+        commit('updateSetting', 
+            {
+                tableName, 
+                key: 'new_ids', 
+                value: new_item_ids.concat(old_ids)
+            }
+        );
+    },
+    makeAllOld({ commit }, { tableName }) {
+        commit('updateSetting', 
+            {
+                tableName, 
+                key: 'new_ids', 
+                value: undefined
+            }
+        );
     }
 }
 
@@ -303,8 +349,16 @@ const mutations = {
      * @param {Object} state 
      * @param {Object} param1 
      */
-    saveListData(state, {tableName, data}) {
+    pushData(state, {tableName, data}) {
         helper.pushProp(state, [tableName, 'data' ], data);
+    },
+    /**
+     * To add a page data
+     * @param {Object} state 
+     * @param {Object} param1 
+     */
+    prependData(state, {tableName, data}) {
+        helper.unshiftProp(state, [tableName, 'data' ], data);
     },
 
     /**
