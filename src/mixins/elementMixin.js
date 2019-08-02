@@ -281,9 +281,9 @@ const formElementMix = {
             resolve(errors);
           })
       });
-      changeReadyStatus ? this.ready(true) : null;
-      this.$root.$emit('element-validated', this.id, this.formName);
+      changeReadyStatus ? this.ready(true) : null;      
       this.validatingStatus(false);
+      this.$root.$emit('element-validated', this.id, this.formName);
       return test;
     },
 
