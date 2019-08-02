@@ -52,15 +52,15 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
             /**
              * Get the total length of data and set in total key, 
              */
-            const total_from_server = helper.getProp(response, total_key, null);
-            if (total_from_server) {
+            const total_from_server = helper.getProp(response, total_key, 0);
+            // if (total_from_server !== undefined) {
                 commit('updateSetting', {
                         tableName, 
                         key: 'total', 
-                        value: total_from_server
+                        value: total_from_server ? total_from_server : 0
                     } 
                 );
-            }
+            // }
             if (shouldDataDelete) {
                 commit('deleteAllData', { tableName });
             }
