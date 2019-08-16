@@ -8,13 +8,22 @@ export default Vue.extend({
     name: 'r-list',
     render: function (createElement) {
         let props = this.$attrs;
+        const slotProps = {
+            model: this.formValues,
+            switchPage: this.switchPage,
+            filter: this.filter,
+            refresh: this.refresh,
+            changePageSize: this.changePageSize,
+        };
+
         return createElement(
             this.tag, 
             { props }, 
             [
-                this.$scopedSlots['lq.top'] ? this.$scopedSlots['lq.top']() : null,
+                this.$scopedSlots['lq.top'] ? this.$scopedSlots['lq.top'](slotProps) : null,
                 this.$scopedSlots.default({
                     items: this.items,
+                    model: this.formValues,
                     currentPage: this.currentPage,
                     previousPage: this.previousPage,
                     pageSize: this.pageSize,
@@ -26,7 +35,8 @@ export default Vue.extend({
                     refresh: this.refresh,
                     changePageSize: this.changePageSize,
                     newIds: this.newIds
-                })
+                }),
+                this.$scopedSlots['lq.bottom'] ? this.$scopedSlots['lq.bottom'](slotProps) : null,
             ]
         )
     },
@@ -67,6 +77,10 @@ export default Vue.extend({
         tag: {
             type: String,
             default: () => 'div'
+        },
+        autoRefresh: {
+            type: Boolean,
+            default: () => true
         },
         staticData: Object
     },
@@ -122,7 +136,7 @@ export default Vue.extend({
 			this.submiting(false);
 			this.$store.dispatch('form/addSettings', {formName: this.formName, settings: {
 				transformKeys: this.transformKeys,
-				extraDataKeys: Object.assign([], [this.pageSizeKey, this.pageKey], this.extraDataKeys),
+				extraDataKeys: [this.pageSizeKey, this.pageKey].concat(this.extraDataKeys ? this.extraDataKeys : []),
 				submit: this.submit,
 				test: this.validate
             }});
@@ -154,9 +168,11 @@ export default Vue.extend({
             /**
              * Form Element value changes.
              */
-            this.$root.$on(this.formName + '_changed', () => {
-                this.$lqTable.filter(this.name);
-            })
+            if (this.autoRefresh) {
+                this.$root.$on(this.formName + '_changed', () => {
+                    this.$lqTable.filter(this.name);
+                })
+            }
         },
         switchPage: function(page) {
             this.$lqTable.switchPage(this.name, page);

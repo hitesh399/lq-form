@@ -232,6 +232,9 @@ const actions = {
      */
     get({commit, state}, {tableName}) {
         const request = this.getters['table/request'](tableName);
+        const page_key = state[tableName].settings.page_key;
+        const formValues =  this.getters['table/formValues'](tableName);
+        const page = formValues[page_key] ? formValues[page_key] : 1;
         /**
          * Removing the data from data.
          */
@@ -240,7 +243,7 @@ const actions = {
         /**
          * Fetching the data from server
          */
-        return fetch(commit, this.dispatch, request, tableName, state, true, 1);
+        return fetch(commit, this.dispatch, request, tableName, state, true, page);
     },
 
     /**
