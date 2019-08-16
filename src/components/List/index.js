@@ -8,7 +8,6 @@ export default Vue.extend({
     name: 'r-list',
     render: function (createElement) {
         let props = this.$attrs;
-        let props = this.$attrs;
         return createElement(
             this.tag, 
             { props }, 
