@@ -15,6 +15,7 @@ export default Vue.extend({
             refresh: this.refresh,
             changePageSize: this.changePageSize,
         };
+        // console.log('I am her to go', this.$lqFormOptions)
 
         return createElement(
             this.tag, 
@@ -42,9 +43,9 @@ export default Vue.extend({
     },
     props: {
         requestMethod: {
-			type: String,
-			default: () => 'GET'
-		},
+            type: String,
+            default: () => 'GET'
+        },
         dataKey: {
             type: [String, Array],
             default: () => 'data.data'
@@ -65,6 +66,7 @@ export default Vue.extend({
             type: String,
             default: () => 'page'
         },
+        defaultPageSize: Number,
         currentPageKey: {
             type: [String, Array],
             default: () => 'data.current_page'
@@ -82,7 +84,11 @@ export default Vue.extend({
             type: Boolean,
             default: () => true
         },
-        staticData: Object
+        staticData: Object,
+        keepSelectedOnPageChange: {
+            type: Boolean,
+            default: () => true
+        }
     },
     computed: {
 
@@ -124,6 +130,12 @@ export default Vue.extend({
     },
     methods: {
         setup: function() {
+            
+            const defaultPageSize = this.defaultPageSize ? this.defaultPageSize : this.$lqFormOptions.pageSize
+            // console.log('defaultPageSize', defaultPageSize)
+            if (defaultPageSize) {
+                this.$lqForm.setElementVal(this.name, this.pageSizeKey, defaultPageSize)
+            }
             /**
              * Define Form Namne
              */
@@ -132,13 +144,14 @@ export default Vue.extend({
             /**
              * Add Form initial setting in state
              */
+
             this.ready(true);
-			this.submiting(false);
-			this.$store.dispatch('form/addSettings', {formName: this.formName, settings: {
-				transformKeys: this.transformKeys,
-				extraDataKeys: [this.pageSizeKey, this.pageKey].concat(this.extraDataKeys ? this.extraDataKeys : []),
-				submit: this.submit,
-				test: this.validate
+            this.submiting(false);
+            this.$store.dispatch('form/addSettings', {formName: this.formName, settings: {
+                transformKeys: this.transformKeys,
+                extraDataKeys: [this.pageSizeKey, this.pageKey].concat(this.extraDataKeys ? this.extraDataKeys : []),
+                submit: this.submit,
+                test: this.validate
             }});
 
             /**
@@ -175,6 +188,10 @@ export default Vue.extend({
             }
         },
         switchPage: function(page) {
+            console.log('keepSelectedOnPageChange', this.keepSelectedOnPageChange)
+            if (!this.keepSelectedOnPageChange) {
+                this.$lqForm.removeElement(this.name, 'selected')
+            }
             this.$lqTable.switchPage(this.name, page);
         },
         changePageSize: function (page_size) {
@@ -213,6 +230,3 @@ export default Vue.extend({
         }
     }
 })
-
-
-    

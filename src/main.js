@@ -44,6 +44,9 @@ export default {
     // The install method will be called with the Vue constructor as
     // the first argument, along with possible options
     install (Vue, options) {
+        Vue.prototype.$lqFormOptions = {
+            pageSize: options.pageSize
+        }
         options.store.registerModule('form', lqFormModule);
         options.store.registerModule('table', lqTableModule);
         Vue.use(formHelper, {store: options.store});
@@ -52,6 +55,3 @@ export default {
         Vue.component('lq-list-filter', lqListFilter);
     }
 }
-
-
-
