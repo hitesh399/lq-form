@@ -1,5 +1,6 @@
 import helper from 'vuejs-object-helper';
 import cloneDeep from 'lodash/cloneDeep'
+import axios from 'axios'
 
 const formMixin = {
 
@@ -67,11 +68,8 @@ const formMixin = {
 	 |--------------------------------------------------------------------------------
 	 *
 	 */
-	destroyed: function () {	
-		
-		if(!this.keepAlive) {
-			this.$lqForm.deleteForm(this.formName);
-		}
+	destroyed: function () {		
+		this.destroyedForm();
 	},
 	computed: {
 
@@ -224,7 +222,6 @@ const formMixin = {
 		touchStatus: function(elementName, status) {
 			this.$lqForm.touchStatus(this.formName, elementName, status);
 		},
-		
 
 		validate: async function () {
 			const fields = {...this.$store.getters['form/fields'](this.formName)};
@@ -242,7 +239,7 @@ const formMixin = {
 			});
 		},
 
-		submit: async function(more_data, shouldEmitEvents) {
+		submit: async function(more_data, shouldEmitEvents, cancle) {
 			shouldEmitEvents = shouldEmitEvents === undefined ? true : shouldEmitEvents;
 			if (!this.canSubmit()) {
 				this.$root.$emit('can-not-submit', this);
@@ -279,10 +276,12 @@ const formMixin = {
 			if (this.requestMethod === 'GET') {
 				url += '?' + helper.objectToQueryString(data)
 			}
+			const CancelToken = axios.CancelToken;
 			return this.$axios({
 				url: url,
 				method: this.requestMethod,
-				data
+				data,
+				cancelToken: typeof cancle === 'function' ? new CancelToken((c) => { this.submiting(false); cancle(c) }) :  () => {}
 			})
 			.then((response) => {
 				this.submiting(false);
@@ -314,6 +313,11 @@ const formMixin = {
 		},
 		canSubmit: function() {
 			return this.isReady && !this.isSubmiting;
+		},
+		destroyedForm() {
+			if(!this.keepAlive) {
+				this.$lqForm.deleteForm(this.formName);
+			}
 		}
 	},
 	watch: {

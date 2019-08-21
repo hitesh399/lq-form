@@ -28,10 +28,10 @@ export  function formHelper (store ) {
      * TO submit the form.
      * @param {String} formName 
      */
-    this.submit = function(formName, data, shouldEmitEvents, getters) {
+    this.submit = function(formName, data, shouldEmitEvents, getters, cancel) {
         getters = getters ? getters : store.getters;
         let settings = getters['form/settings'](formName);
-        return settings.submit(data, shouldEmitEvents);
+        return settings.submit(data, shouldEmitEvents, cancel);
     }
     /**
      * To get Element value

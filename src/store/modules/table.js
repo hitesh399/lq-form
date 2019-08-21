@@ -5,7 +5,7 @@ import cloneDeep from 'lodash/cloneDeep'
 
 const Formhelper = new lqFormHelper(null);
 
-let _call_back = {};
+let cancel  = {};
 /**
  * Fetch data from server.
  * @param {Function} commit 
@@ -20,84 +20,89 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
     const total_key  = state[tableName].settings.total_key;
     const type  = state[tableName].settings.type;
     const requesting  = state[tableName].requesting;
-    if (requesting) {
-        _call_back[tableName] = () => { fetch(commit, dispatch, request, tableName, state, shouldDataDelete) }
-        return ;
+    if (requesting ) {
+        commit('updateRequestingStatus', {tableName, status: false});
+        if (typeof cancel[tableName] === 'function') {
+            cancel[tableName]();
+        }
     }
     commit('updateRequestingStatus', {tableName, status: true});
-    return request()
-        .then((response) => {
-            /**
-             * Changing the request status as false
-             */
-            commit('updateRequestingStatus', {tableName, status: false});
-            /**
-             * Geting the data, current_page  veriable value from the serevr response.
-             */
-    
-            // const current_page = current_page_key ? helper.getProp(response, current_page_key , 1) : 1;
-            const current_page = page ? page : 1;
-            let data = data_key ? helper.getProp(response, data_key, []) : response;
-            data = data ? data : []; 
+    return request((c) => {
+        cancel[tableName] = c;
+    }).then((response) => {
+        /**
+         * Changing the request status as false
+         */
+        commit('updateRequestingStatus', {tableName, status: false});
+        /**
+         * Geting the data, current_page  veriable value from the serevr response.
+         */
 
-            /**
-             * Current page is greater than 1 and doesn't have data before request resolve then move to previous page
-             * So the page does not display blank when switching page. it is usefull when using the pagination.
-             */
-            if (current_page > 1 && data.length === 0 && type === 'table') {
-                dispatch('table/switchPage', {tableName, page: current_page -1 });
-                return;
-            }
+        // const current_page = current_page_key ? helper.getProp(response, current_page_key , 1) : 1;
+        const current_page = page ? page : 1;
+        let data = data_key ? helper.getProp(response, data_key, []) : response;
+        data = data ? data : []; 
 
-            /**
-             * Get the total length of data and set in total key, 
-             */
-            const total_from_server = helper.getProp(response, total_key, 0);
-            // if (total_from_server !== undefined) {
-                commit('updateSetting', {
-                        tableName, 
-                        key: 'total', 
-                        value: total_from_server ? total_from_server : 0
-                    } 
-                );
-            // }
-            if (shouldDataDelete) {
-                commit('deleteAllData', { tableName });
-            }
-            /**
-             * Set the given page data 
-             */
-            if (type === 'table') {
-                commit('saveData', {tableName, data, page: current_page});
-            } else {
-                commit('pushData', {tableName, data});
-            }
-            /**
-             * Rest the new Items
-             */
-            dispatch('table/makeAllOld', { tableName })
+        /**
+         * Current page is greater than 1 and doesn't have data before request resolve then move to previous page
+         * So the page does not display blank when switching page. it is usefull when using the pagination.
+         */
+        if (current_page > 1 && data.length === 0 && type === 'table') {
+            dispatch('table/switchPage', {tableName, page: current_page -1 });
+            return;
+        }
 
-            /**
-             * Set the key of loading page,
-             * To maintain the record that how many page's data is loaded in state.
-             */
-            commit('addLoadedPage', {tableName, page: current_page});
+        /**
+         * Get the total length of data and set in total key, 
+         */
+        const total_from_server = helper.getProp(response, total_key, 0);
+        // if (total_from_server !== undefined) {
+            commit('updateSetting', {
+                    tableName, 
+                    key: 'total', 
+                    value: total_from_server ? total_from_server : 0
+                } 
+            );
+        // }
+        if (shouldDataDelete) {
+            commit('deleteAllData', { tableName });
+        }
+        /**
+         * Set the given page data 
+         */
+        if (type === 'table') {
+            commit('saveData', {tableName, data, page: current_page});
+        } else {
+            commit('pushData', {tableName, data});
+        }
+        /**
+         * Rest the new Items
+         */
+        dispatch('table/makeAllOld', { tableName })
 
-            if (_call_back[tableName]) {
-                _call_back[tableName]()
-                delete _call_back[tableName]
-            }
-            
-            return response;
+        /**
+         * Set the key of loading page,
+         * To maintain the record that how many page's data is loaded in state.
+         */
+        commit('addLoadedPage', {tableName, page: current_page});
 
-        }).catch((e) => {
-            /**
-             * Changing the request status as false
-             */
-            commit('updateRequestingStatus', {tableName, status: false});
-            delete _call_back[tableName]
-            throw Error(e);
-        })
+        // if (_call_back[tableName]) {
+        //     _call_back[tableName]()
+        //     delete _call_back[tableName]
+        // }
+        delete cancel[tableName];
+        
+        return response;
+
+    }).catch((e) => {
+        /**
+         * Changing the request status as false
+         */
+        delete cancel[tableName];
+        commit('updateRequestingStatus', {tableName, status: false});
+        // delete _call_back[tableName]
+        throw Error(e);
+    })
     
 }
 
@@ -117,7 +122,7 @@ const getters = {
         if (offset !== false && offset !== undefined) {
             static_data.offset = offset
         }
-        return () => Formhelper.submit(tableName + tableFormSuffix, static_data, false, rootGetters);
+        return (cancel) => Formhelper.submit(tableName + tableFormSuffix, static_data, false, rootGetters, cancel);
     },
     hasPages: (state) => (tableName) => {
         return helper.getProp(state, [tableName, 'settings', 'has_pages'], []);
@@ -420,9 +425,9 @@ const mutations = {
 
 
 export default  {
-	namespaced: true,
-	state,
-	actions,
+    namespaced: true,
+    state,
+    actions,
     mutations,
     getters
 }
