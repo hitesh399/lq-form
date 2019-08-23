@@ -24,6 +24,7 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
         commit('updateRequestingStatus', {tableName, status: false});
         if (typeof cancel[tableName] === 'function') {
             cancel[tableName]();
+            commit('form/changeStatus', {formName: tableName, statusKey: 'isSubmiting', status: false}, { root: true })
         }
     }
     commit('updateRequestingStatus', {tableName, status: true});
@@ -90,8 +91,7 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
         //     _call_back[tableName]()
         //     delete _call_back[tableName]
         // }
-        delete cancel[tableName];
-        
+        delete cancel[tableName];        
         return response;
 
     }).catch((e) => {
@@ -100,7 +100,6 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
          */
         delete cancel[tableName];
         commit('updateRequestingStatus', {tableName, status: false});
-        // delete _call_back[tableName]
         throw Error(e);
     })
     

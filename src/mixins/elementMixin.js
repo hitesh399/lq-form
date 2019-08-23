@@ -84,6 +84,10 @@ const formElementMix = {
     name: function () {
       return this.id.split('.').map(function(item, index)  { return index >0 ? '['+item+']': item  }).join('');
     },
+    myRulesInForm: function () {
+      console.log('myRulesInForm', this.lqForm.rules)
+      return helper.getProp(this.lqForm.rules, this.simpleName, null)
+    },
     /**
      * Get form values
      */
@@ -111,6 +115,16 @@ const formElementMix = {
     }
   },
   inject: ['lqForm'],
+  watch: {
+    myRulesInForm: {
+      handler (newval, oldVale) {
+        if (!isEqual(newval, oldVale)) {
+          this.lqElRules = newval;
+        }
+      },
+      immediate: true
+    }
+  },
   created () {
     this.formName = this.lqForm.name;
     
