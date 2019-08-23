@@ -281,7 +281,7 @@ const formMixin = {
 				url: url,
 				method: this.requestMethod,
 				data,
-				cancelToken: typeof cancle === 'function' ? new CancelToken(cancle) :  () => {}
+				cancelToken: typeof cancle === 'function' ? new CancelToken(cancle) :  undefined
 			})
 			.then((response) => {
 				this.submiting(false);
