@@ -87,7 +87,6 @@ const formElementMix = {
       return this.id.split('.').map(function(item, index)  { return index >0 ? '['+item+']': item  }).join('');
     },
     myRulesInForm: function () {
-      console.log('myRulesInForm', this.lqForm.rules)
       return helper.getProp(this.lqForm.rules, this.simpleName, null)
     },
     /**
@@ -149,11 +148,6 @@ const formElementMix = {
       touch: false,
       test: this.validate
     });
-
-    /**
-     * Get Validation rule from form class.
-     */
-    this.lqElRules = this.lqForm.rules ? helper.getProp(this.lqForm.rules, this.simpleName, null) : null;
   },
 
   methods: {
