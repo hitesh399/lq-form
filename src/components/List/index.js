@@ -202,10 +202,20 @@ export default Vue.extend({
             this.$lqTable.switchPage(this.name, page, sendOffset, force);
         },
         filter: function() {
-            this.$lqTable.filter(this.name);
+            const response = this.$lqTable.filter(this.name);
+            if (response) {
+                response.then((response) => {
+                    this.$emit('initial-data', response)
+                })
+            }
         },
         refresh: function(changePage = false) {
-            this.$lqTable.refresh(this.name, changePage);
+           const response = this.$lqTable.refresh(this.name, changePage);
+           if (response && changePage) {
+                response.then((response) => {
+                    this.$emit('initial-data', response)
+                })
+            }
         },
         updateRow: function(row ) {
             this.$lqTable.updateRow(this.name, row);
