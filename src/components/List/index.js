@@ -188,7 +188,6 @@ export default Vue.extend({
             }
         },
         switchPage: function(page) {
-            console.log('keepSelectedOnPageChange', this.keepSelectedOnPageChange)
             if (!this.keepSelectedOnPageChange) {
                 this.$lqForm.removeElement(this.name, 'selected')
             }
