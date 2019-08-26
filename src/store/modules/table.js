@@ -20,6 +20,7 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
     const total_key  = state[tableName].settings.total_key;
     const type  = state[tableName].settings.type;
     const requesting  = state[tableName].requesting;
+    const otherServerData  = state[tableName].otherServerData;
     if (requesting ) {
         commit('updateRequestingStatus', {tableName, status: false});
         if (typeof cancel[tableName] === 'function') {
@@ -57,14 +58,12 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
          * Get the total length of data and set in total key, 
          */
         const total_from_server = helper.getProp(response, total_key, 0);
-        // if (total_from_server !== undefined) {
-            commit('updateSetting', {
-                    tableName, 
-                    key: 'total', 
-                    value: total_from_server ? total_from_server : 0
-                } 
-            );
-        // }
+        commit('updateSetting', {
+                tableName, 
+                key: 'total', 
+                value: total_from_server ? total_from_server : 0
+            } 
+        );
         if (shouldDataDelete) {
             commit('deleteAllData', { tableName });
         }
@@ -75,6 +74,19 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
             commit('saveData', {tableName, data, page: current_page});
         } else {
             commit('pushData', {tableName, data});
+        }
+        /**
+         * Store more server response
+         */
+        if (otherServerData && helper.isArray(otherServerData)) {
+            otherServerData.forEach((serverResponseKey) => {
+                const keyValue = helper.getProp(response, serverResponseKey);
+                if (keyValue !== undefined) {
+                    const index = serverResponseKey.lastIndexOf('.')
+                    const finalKey = serverResponseKey.substr(index + 1, serverResponseKey.length)
+                    commit('updateSetting', { tableName, key: `other_data.${finalKey}`, value: keyValue });
+                }
+            })
         }
         /**
          * Rest the new Items
@@ -310,7 +322,7 @@ const mutations = {
      * @param {Object} param1 
      */
     updateSetting(state, {tableName, key, value}) {
-        helper.setProp(state, [tableName, 'settings', key], value, true);
+        helper.setProp(state, `${tableName}.settings.${key}`, value, true);
     },
     /**
      * To update Requesting status

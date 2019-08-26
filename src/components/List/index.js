@@ -88,7 +88,8 @@ export default Vue.extend({
         keepSelectedOnPageChange: {
             type: Boolean,
             default: () => true
-        }
+        },
+        otherServerData: Array
     },
     computed: {
 
@@ -165,7 +166,8 @@ export default Vue.extend({
                 type: this.type,
                 static_data: this.staticData,
                 page_size_key: this.pageSizeKey,
-                page_key: this.pageKey
+                page_key: this.pageKey,
+                otherServerData: this.otherServerData
             }})
 
             /**
@@ -173,9 +175,7 @@ export default Vue.extend({
              */
             const response = this.$store.dispatch('table/get', {tableName: this.name});
             if (response) {
-                response.then((response) => {
-                    this.$emit('initial-data', response)
-                })
+                this.emitDataLoaded(response)
             }
 
             /**
@@ -203,17 +203,13 @@ export default Vue.extend({
         filter: function() {
             const response = this.$lqTable.filter(this.name);
             if (response) {
-                response.then((response) => {
-                    this.$emit('initial-data', response)
-                })
+                this.emitDataLoaded(response)
             }
         },
         refresh: function(changePage = false) {
            const response = this.$lqTable.refresh(this.name, changePage);
            if (response && changePage) {
-                response.then((response) => {
-                    this.$emit('initial-data', response)
-                })
+                this.emitDataLoaded(response)
             }
         },
         updateRow: function(row ) {
@@ -221,6 +217,11 @@ export default Vue.extend({
         },
         deleteRow: function(row) {
             this.$lqTable.deleteRow(this.name, row);
+        },
+        emitDataLoaded (response) {
+            response.then((response) => {
+                this.$emit('initial-data', response)
+            })
         }
     },
     beforeDestroy() { 
