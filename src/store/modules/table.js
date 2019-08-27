@@ -20,7 +20,7 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
     const total_key  = state[tableName].settings.total_key;
     const type  = state[tableName].settings.type;
     const requesting  = state[tableName].requesting;
-    const otherServerData  = state[tableName].otherServerData;
+    const otherServerData  = state[tableName].settings.otherServerData;
     if (requesting ) {
         commit('updateRequestingStatus', {tableName, status: false});
         if (typeof cancel[tableName] === 'function') {
