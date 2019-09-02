@@ -76,6 +76,10 @@ export default Vue.extend({
             validate: (v) => ['table', 'list'].indexOf(value) !== -1,
             default: () => 'list'
         },
+        keepAlive: {
+            type: Boolean,
+            default: function(){ return true}
+        },
         tag: {
             type: String,
             default: () => 'div'
