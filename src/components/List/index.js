@@ -173,10 +173,12 @@ export default Vue.extend({
             /**
              * Request to server
              */
-            const response = this.$store.dispatch('table/get', {tableName: this.name});
-            if (response) {
-                this.emitDataLoaded(response)
-            }
+            this.$nextTick(() => {
+                const response = this.$store.dispatch('table/get', {tableName: this.name});
+                if (response) {
+                    this.emitDataLoaded(response)
+                }
+            })
 
             /**
              * Form Element value changes.
