@@ -112,7 +112,7 @@ export default Vue.extend({
             }
         },
         currentPage: function () {
-            return helper.getProp(this.$store.state, ['form', this.formName, 'values', 'page'], 1);
+            return helper.getProp(this.$store.state, ['form', this.name, 'values', 'page'], 1);
         },
         previousPageData: function() {
             return helper.getProp(this.$store.state, ['table', this.name, 'data', 'page_' + this.previousPage], []);
@@ -121,7 +121,7 @@ export default Vue.extend({
             return helper.getProp(this.$store.state, ['table', this.name, 'settings', 'prev_page'], 1);
         },
         pageSize: function () {
-            return helper.getProp(this.$store.state, ['form', this.formName, 'values', 'page_size'], 15);
+            return helper.getProp(this.$store.state, ['form', this.name, 'values', 'page_size'], null);
         },
         total: function () {
             return helper.getProp(this.$store.state, ['table', this.name, 'settings', 'total'], 0);
@@ -134,17 +134,18 @@ export default Vue.extend({
         }
     },
     methods: {
-        setup: function() {
-            
-            const defaultPageSize = this.defaultPageSize ? this.defaultPageSize : this.$lqFormOptions.pageSize
-            // console.log('defaultPageSize', defaultPageSize)
-            if (defaultPageSize) {
-                this.$lqForm.setElementVal(this.name, this.pageSizeKey, defaultPageSize)
-            }
+        setup: function() {            
             /**
              * Define Form Namne
              */
             this.formName = this.name;
+
+
+            const defaultPageSize = this.defaultPageSize ? this.defaultPageSize : this.$lqFormOptions.pageSize
+            // console.log('defaultPageSize', defaultPageSize)
+            if (defaultPageSize && !this.pageSize) {
+                this.$lqForm.setElementVal(this.name, this.pageSizeKey, defaultPageSize)
+            }            
             
             /**
              * Add Form initial setting in state
