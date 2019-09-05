@@ -1,11 +1,11 @@
 {
   "name": "lq-form",
-  "version": "0.1.63",
+  "version": "0.1.65",
   "private": false,
   "scripts": {
     "serve": "vue-cli-service serve src/play/index.js",
-   "build-bundle": "vue-cli-service build --target lib --name lq.form src/main.js", "build": "vue-cli-service build",
-    
+    "build-bundle": "vue-cli-service build --target lib --name lq.form src/main.js", 
+    "build": "vue-cli-service build",
     "test:e2e": "vue-cli-service test:e2e",
     "update-plugins": "node plugins_update",
     "test:unit": "vue-cli-service test:unit"
