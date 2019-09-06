@@ -245,16 +245,16 @@ const formElementMix = {
      * Validate the element.
      * @param {Boolean} changeReadyStatus
      */
-    validate: async function (changeReadyStatus = true, whenTouched = true) {
+    validate: async function (changeReadyStatus = true, forceTest = true) {
       if(!this.lqElRules) {
         this.removeAllErrors();
         return;
       }
-      if (!this.touch && whenTouched) {
+      if (!this.touch && forceTest) {
         return;
       }
       if (this.validating && this.validationCallback === null) {
-        this.validationCallback = () => this.validate(changeReadyStatus);
+        this.validationCallback = () => this.validate(changeReadyStatus, forceTest);
         return;
       }
       this.removeAllErrors();
@@ -280,15 +280,24 @@ const formElementMix = {
       const test = await new Promise((resolve) => {
         window.validatejs.async(element_values, validation_rules, options)
           .then( (response) => {
-            this.validationCallback ? this.validationCallback():  resolve();
-            this.validationCallback = null;
+            if (!this.validationCallback) {
+              resolve()
+            } else {
+              this.validationCallback()
+              this.validationCallback = null
+            }
           })
           .catch((errors) => {
-            const error_elements = Object.keys(errors);
-            error_elements.forEach( (error_element) => {
-              this.addError(errors[error_element],  error_element.replaceAll('\\',''));
-            })
-            resolve(errors);
+            if (!this.validationCallback) {
+              const error_elements = Object.keys(errors);
+              error_elements.forEach( (error_element) => {
+                this.addError(errors[error_element],  error_element.replaceAll('\\',''));
+              })
+              resolve(errors);
+            } else {
+              this.validationCallback()
+              this.validationCallback = null
+            }
           })
       });
       changeReadyStatus ? this.ready(true) : null;      
