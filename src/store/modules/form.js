@@ -124,11 +124,12 @@ const mutations = {
 	addNewTransformKey(state, {formName, key}) {
 		helper.pushProp(state, `${formName}.settings.transformKeys`, key);
 	},
-	saveElementValue(state, {formName, elementName, value}) {
-		const val = typeof value === 'object' ? cloneDeep(value) : value
-		const _val = typeof value === 'object' ? cloneDeep(value) : value
-		helper.setProp(state, `${formName}.initialize_values.${elementName}`, _val, true)
-		helper.setProp(state, `${formName}.values.${elementName}`, val, true)
+	saveElementValue(state, {formName, elementName, value, changeInIntial}) {
+		if (changeInIntial) {
+			const _val = typeof value === 'object' ? cloneDeep(value) : value
+			helper.setProp(state, `${formName}.initialize_values.${elementName}`, _val, true)
+		}
+		helper.setProp(state, `${formName}.values.${elementName}`, value, true)
 	},
 	pushNewElement(state, {formName, elementName, value}) {
 

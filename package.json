@@ -1,10 +1,6 @@
 {
   "name": "lq-form",
-<<<<<<< HEAD
-  "version": "0.1.64",
-=======
-  "version": "0.1.65",
->>>>>>> abe3e67ca8ef348d41e757061b72d5a0476d43d6
+  "version": "0.1.66",
   "private": false,
   "scripts": {
     "serve": "vue-cli-service serve src/play/index.js",
