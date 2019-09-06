@@ -22,9 +22,9 @@ const getters = {
 
 const actions = {
 
-	setElementValue({commit}, {formName, elementName, value, changeInIntial}) {
+	setElementValue({commit}, { formName, elementName, value, changeInInitial }) {
 
-		commit('saveElementValue', { formName,  elementName,  value, changeInIntial});
+		commit('saveElementValue', { formName,  elementName,  value, changeInInitial });
 	},
 	addNewElement({commit}, {formName, elementName, value}) {
 
@@ -124,8 +124,8 @@ const mutations = {
 	addNewTransformKey(state, {formName, key}) {
 		helper.pushProp(state, `${formName}.settings.transformKeys`, key);
 	},
-	saveElementValue(state, {formName, elementName, value, changeInIntial}) {
-		if (changeInIntial) {
+	saveElementValue(state, { formName, elementName, value, changeInInitial }) {
+		if (changeInInitial) {
 			const _val = typeof value === 'object' ? cloneDeep(value) : value
 			helper.setProp(state, `${formName}.initialize_values.${elementName}`, _val, true)
 		}

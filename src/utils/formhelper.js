@@ -39,8 +39,8 @@ export  function formHelper (store ) {
      * @param {String} elementName 
      * @param {String} value 
      */
-    this.setElementVal = function (formName, elementName, value, changeInIntial = false) {
-        store.dispatch('form/setElementValue', {formName, elementName, value, changeInIntial: changeInIntial });
+    this.setElementVal = function (formName, elementName, value, changeInInitial = false) {
+        store.dispatch('form/setElementValue', {formName, elementName, value, changeInInitial: changeInInitial });
     }
     /**
      * To set the initialized values
