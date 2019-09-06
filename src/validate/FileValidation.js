@@ -44,6 +44,8 @@ function fileValidation (value, rules, elementName, values, options) {
         max,
         crop
     } = rules;
+    value = value ? value : {};
+    
     const {file, id, cropped} = value;
 
     let maxFileSizeBytes = maxFileSize ? maxFileSize*1024*1204 : null;

@@ -22,9 +22,9 @@ const getters = {
 
 const actions = {
 
-	setElementValue({commit}, {formName, elementName, value}) {
+	setElementValue({commit}, {formName, elementName, value, changeInIntial}) {
 
-		commit('saveElementValue', { formName,  elementName,  value});
+		commit('saveElementValue', { formName,  elementName,  value, changeInIntial});
 	},
 	addNewElement({commit}, {formName, elementName, value}) {
 
