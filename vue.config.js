@@ -2,11 +2,6 @@
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 module.exports = {
-    configureWebpack: {
-      plugins: [
-        // new BundleAnalyzerPlugin()
-      ]
-    },
     configureWebpack: config => {
 	    config.externals = {
 	       ...config.externals,
