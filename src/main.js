@@ -14,6 +14,7 @@ import lqFileMixin from './mixins/fileMixin';
  * LQ Form Components 
  */
 import lqList from './components/List'
+import { EventBus } from './components/event-bus'
 import lqListFilter from './components/List/Filter'
 /**
  * Form Modules
@@ -38,7 +39,7 @@ window.validatejs.validators.file = function(value, rules,  id, values, options 
     return fileValidation(value, rules, id, values, options)
 };
 
-export { lqElementMixin, lqFormMixin, lqFileMixin, lqFormHelper, lqPermissionMixin};
+export { lqElementMixin, lqFormMixin, lqFileMixin, lqFormHelper, lqPermissionMixin, EventBus};
 
 export default {
     // The install method will be called with the Vue constructor as

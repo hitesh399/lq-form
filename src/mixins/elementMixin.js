@@ -1,6 +1,7 @@
 import helper from 'vuejs-object-helper';
 import cloneDeep from 'lodash/cloneDeep'
 import { isEqual } from 'lodash/core'
+import { EventBus } from '../components/event-bus';
 
 const formElementMix = {
   props: {
@@ -270,13 +271,16 @@ const formElementMix = {
 
       if (this.validateArrayIndex && window.validatejs.isArray(this.LQElement)) {
         this.LQElement.forEach((singleVal, index) => {
+          const elementFullName = this.id + '.' + index
           validation_rules[this.id + '\\.' + index] = this.lqElRules;
-          element_values[this.id + '.' + index] = singleVal;
+          element_values[elementFullName] = singleVal;
         })
       } else {
         validation_rules[this.id] = this.lqElRules;
       }
       element_values[this.id] = this.LQElement;
+      let _errorRoles = [];
+
       const test = await new Promise((resolve) => {
         window.validatejs.async(element_values, validation_rules, options)
           .then( (response) => {
@@ -289,11 +293,20 @@ const formElementMix = {
           })
           .catch((errors) => {
             if (!this.validationCallback) {
+              let _error_messages = {}; 
               const error_elements = Object.keys(errors);
               error_elements.forEach( (error_element) => {
-                this.addError(errors[error_element],  error_element.replaceAll('\\',''));
+                const elName = error_element.replaceAll('\\', '')
+                const elErrors = errors[error_element];
+                const _errors = helper.getProp(elErrors, '0.errors');
+                const errorRoles = helper.getProp(elErrors, '0.errorRoles', []);
+                _errorRoles = _errorRoles.concat(errorRoles)
+                const errorMesage = _errors ? _errors : elErrors;
+                this.addError(errorMesage, elName);
+                _error_messages[elName] = errorMesage
+                EventBus.$emit('lq-element-validated-' + this.formName + '-' + elName, errorMesage, errorRoles)
               })
-              resolve(errors);
+              resolve(_error_messages);
             } else {
               this.validationCallback()
               this.validationCallback = null
@@ -302,7 +315,7 @@ const formElementMix = {
       });
       changeReadyStatus ? this.ready(true) : null;      
       this.validatingStatus(false);
-      this.$emit('element-validated', test);
+      this.$emit('element-validated', test, _errorRoles);
       return test;
     },
 

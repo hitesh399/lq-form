@@ -6,9 +6,12 @@ const state = {
 }
 const getters = {
 
-	errros: (state) => (formName) => {
+	errors: (state) => (formName) => {
 		return state[formName] && state[formName].errors ? state[formName].errors : {};
 	},
+	// errorInRules: (state) => (formName) => {
+	// 	return state[formName] && state[formName].error_in_rules ? state[formName].error_in_rules : {};
+	// },
 	values: (state) => (formName) => {
 		return state[formName] && state[formName].values ? state[formName].values : {};
 	},
@@ -58,6 +61,22 @@ const actions = {
 
 		commit('deleteDataKey', { formName, elementName, dataKey: 'errors'});
 	},
+	// addAllErrorInRules({commit}, {formName, rules}) {
+
+	// 	commit('saveDataKey', { formName, data: rules, dataKey: 'error_in_rules'});
+	// },
+	// addErrorInRules({commit}, {formName, elementName, rules}) {
+
+	// 	commit('updateDataKey', { formName, elementName, data: rules, dataKey: 'error_in_rules'});
+	// },
+	// removeAllErrorInRules({commit}, {formName}) {
+
+	// 	commit('destroyDataKey', { formName, dataKey: 'error_in_rules'});
+	// },
+	// removeErrorInRule({commit}, {formName, elementName}) {
+
+	// 	commit('deleteDataKey', { formName, elementName, dataKey: 'error_in_rules'});
+	// },
 	addSettings({commit}, {formName, settings}) {
 
 		commit('saveDataKey', { formName, data: settings, dataKey: 'settings'});
@@ -236,11 +255,21 @@ const mutations = {
 		this.dispatch('form/removeError', { formName, elementName});
 
 		// Rearrange the Errors index
-		let errors = {...this.getters['form/errros'](formName)};
-		let updatedErrors = helper.reArrangeObjectIndex(errors, elementName);		
+		let errors = {...this.getters['form/errors'](formName)};
+		const updatedErrors = helper.reArrangeObjectIndex(errors, elementName);		
 		if(updatedErrors){
 			this.dispatch('form/addErrors', { formName, errors: updatedErrors});
 		}
+
+		/**
+		 * Removing Error In rule
+		 */
+		// this.dispatch('form/removeErrorInRule', { formName, elementName});
+		// let errorInRules = {...this.getters['form/errorInRules'](formName)};
+		// let updatedErrorInRules = helper.reArrangeObjectIndex(errorInRules, elementName);
+		// if(updatedErrorInRules) {
+		// 	this.dispatch('form/addAllErrorInRules', { formName, rules: updatedErrorInRules});
+		// }
 
 		/**
 		 * Deleting the Field Index from Fields Object and Re-arrange the Indexing.

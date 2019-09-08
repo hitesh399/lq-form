@@ -22,7 +22,7 @@ export  function formHelper (store ) {
     }
     this.errors = function (formName, getters) {
         getters = getters ? getters : store.getters;
-        return getters['form/errros'](formName);
+        return getters['form/errors'](formName);
     }
     /**
      * TO submit the form.

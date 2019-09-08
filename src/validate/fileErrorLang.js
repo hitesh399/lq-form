@@ -2,8 +2,8 @@ export default {
     maxFileSize: 'File size should be less than %{maxFileSize} MB and Selected file size is %{fileSize} MB',
     minFileSize: 'File size should be greater than %{minFileSize} MB and Selected file size is %{fileSize} MB',
     
-    minImageWidth: 'Image width should be greater than %{minImageWidth} PX and Selected file width is %{fileWidth}',
-    minImageHeight: 'Image height should be greater than %{minImageHeight} PX and Selected file height is %{fileHeight}',
+    minImageWidth: 'Image width should be greater than %{minImageWidth} PX and Selected file width is %{imageWidth}',
+    minImageHeight: 'Image height should be greater than %{minImageHeight} PX and Selected file height is %{imageHeight}',
     minImageWidthHeight: 'Image width/height should be greater than %{minImageWidth}/%{minImageHeight} PX.',
     
     maxImageWidth: 'Image width should be less than %{maxImageWidth} PX.',
