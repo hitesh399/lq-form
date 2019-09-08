@@ -191,10 +191,13 @@ function fileValidation (value, rules, elementName, values, options) {
                         errorRoles.push('file:crop')
                         errors.push(generateErrorMessage('crop', null, message));
                     }
+                    if (errors.length) {
+                        errors.push({errorRoles})
+                    }
                     /**
                      * Resolving the promise instance
                      */
-                    resolve(errors.length ? { errors, errorRoles } : '');
+                    resolve(errors.length ? errors: '');
                 }
 
                 img.src = e.target.result;
@@ -203,7 +206,10 @@ function fileValidation (value, rules, elementName, values, options) {
                 /**
                  * Resolving the promise instance
                  */
-                resolve(errors.length ? { errors, errorRoles } : '');
+                if (errors.length) {
+                    errors.push({errorRoles})
+                }
+                resolve(errors.length ? errors: '');
             }
             
         }

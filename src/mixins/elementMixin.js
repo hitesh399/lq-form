@@ -295,31 +295,20 @@ const formElementMix = {
             if (!this.validationCallback) {
               let _error_messages = {}; 
               const error_elements = Object.keys(errors);
-              
               error_elements.forEach( (error_element) => {
                 const elName = error_element.replaceAll('\\', '')
-                const elErrors = errors[error_element];
-                let myErrors = [];
+                let elErrors = errors[error_element];
                 let myErrorRules = [];
-                elErrors.forEach(er => {
-                  if (typeof er === 'object') {
-                    if (er.errors && helper.isArray(er.errors)) {
-                      er.errors.forEach(e =>  myErrors.push(e))
-                    } else if (typeof er.errors === 'string') {
-                      myErrors.push(er.errors)
-                    }
-                    if (helper.isArray(er.errorRoles) && er.errorRoles.length) {
-                      myErrorRules = myErrorRules.concat(er.errorRoles.slice())
-                    }
-                  } else {
-                    myErrors.push(er)
-                  }
-                })
-                
+
+                const _last_error = elErrors[elErrors.length - 1];
+                if (typeof _last_error === 'object' && _last_error.errorRoles) {
+                  myErrorRules = myErrorRules.concat(_last_error.errorRoles.slice())
+                  elErrors.splice(-1)
+                }
                 _errorRoles = _errorRoles.concat(myErrorRules)
-                this.addError(myErrors, elName);
-                _error_messages[elName] = myErrors
-                EventBus.$emit('lq-element-validated-' + this.formName + '-' + elName, myErrors, myErrorRules)
+                this.addError(elErrors, elName);
+                _error_messages[elName] = elErrors
+                EventBus.$emit('lq-element-validated-' + this.formName + '-' + elName, elErrors, myErrorRules)
               })
               resolve(_error_messages);
             } else {
