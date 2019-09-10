@@ -101,7 +101,7 @@ function fileValidation (value, rules, elementName, values, options) {
              * Checking file size for min validation
              */
             if(minFileSizeBytes && e.total <  minFileSizeBytes) {
-                errorRoles.push('file:maxFileSize')
+                errorRoles.push('file:minFileSize')
                 errors.push(generateErrorMessage('minFileSize', attribues, message));
             }
             /**
