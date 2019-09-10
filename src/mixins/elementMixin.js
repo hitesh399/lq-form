@@ -286,6 +286,12 @@ const formElementMix = {
           .then( (response) => {
             if (!this.validationCallback) {
               resolve()
+              const error_elements = Object.keys(element_values);
+              error_elements.forEach( (error_element) => {
+                const elName = error_element.replaceAll('\\', '')
+                EventBus.$emit('lq-element-validated-' + this.formName + '-' + elName, null, [])
+              })
+              
             } else {
               this.validationCallback()
               this.validationCallback = null
