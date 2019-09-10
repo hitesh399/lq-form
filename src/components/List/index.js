@@ -18,8 +18,8 @@ export default Vue.extend({
         // console.log('I am her to go', this.$lqFormOptions)
 
         return createElement(
-            this.tag, 
-            { props }, 
+            this.tag,
+            { props },
             [
                 this.$scopedSlots['lq.top'] ? this.$scopedSlots['lq.top'](slotProps) : null,
                 this.$scopedSlots.default({
@@ -78,7 +78,7 @@ export default Vue.extend({
         },
         keepAlive: {
             type: Boolean,
-            default: function(){ return true}
+            default: function () { return true }
         },
         tag: {
             type: String,
@@ -114,10 +114,10 @@ export default Vue.extend({
         currentPage: function () {
             return helper.getProp(this.$store.state, ['form', this.name, 'values', 'page'], 1);
         },
-        previousPageData: function() {
+        previousPageData: function () {
             return helper.getProp(this.$store.state, ['table', this.name, 'data', 'page_' + this.previousPage], []);
         },
-        previousPage: function (){
+        previousPage: function () {
             return helper.getProp(this.$store.state, ['table', this.name, 'settings', 'prev_page'], 1);
         },
         pageSize: function () {
@@ -134,7 +134,7 @@ export default Vue.extend({
         }
     },
     methods: {
-        setup: function() {            
+        setup: function () {
             /**
              * Define Form Namne
              */
@@ -145,41 +145,45 @@ export default Vue.extend({
             // console.log('defaultPageSize', defaultPageSize)
             if (defaultPageSize && !this.pageSize) {
                 this.$lqForm.setElementVal(this.name, this.pageSizeKey, defaultPageSize)
-            }            
-            
+            }
+
             /**
              * Add Form initial setting in state
              */
 
             this.ready(true);
             this.submiting(false);
-            this.$store.dispatch('form/addSettings', {formName: this.formName, settings: {
-                transformKeys: this.transformKeys,
-                extraDataKeys: [this.pageSizeKey, this.pageKey].concat(this.extraDataKeys ? this.extraDataKeys : []),
-                submit: this.submit,
-                test: this.validate
-            }});
+            this.$store.dispatch('form/addSettings', {
+                formName: this.formName, settings: {
+                    transformKeys: this.transformKeys,
+                    extraDataKeys: [this.pageSizeKey, this.pageKey].concat(this.extraDataKeys ? this.extraDataKeys : []),
+                    submit: this.submit,
+                    test: this.validate
+                }
+            });
 
             /**
              * Store table setting data in state
              */
-            this.$store.dispatch('table/updateSettings', {tableName: this.name, settings: {
-                data_key: this.dataKey,
-                total_key: this.totalKey,
-                current_page_key: this.currentPageKey,
-                primary_key: this.primaryKey,
-                type: this.type,
-                static_data: this.staticData,
-                page_size_key: this.pageSizeKey,
-                page_key: this.pageKey,
-                otherServerData: this.otherServerData
-            }})
+            this.$store.dispatch('table/updateSettings', {
+                tableName: this.name, settings: {
+                    data_key: this.dataKey,
+                    total_key: this.totalKey,
+                    current_page_key: this.currentPageKey,
+                    primary_key: this.primaryKey,
+                    type: this.type,
+                    static_data: this.staticData,
+                    page_size_key: this.pageSizeKey,
+                    page_key: this.pageKey,
+                    otherServerData: this.otherServerData
+                }
+            })
 
             /**
              * Request to server
              */
             this.$nextTick(() => {
-                const response = this.$store.dispatch('table/get', {tableName: this.name});
+                const response = this.$store.dispatch('table/get', { tableName: this.name });
                 if (response) {
                     this.emitDataLoaded(response)
                 }
@@ -194,7 +198,7 @@ export default Vue.extend({
                 })
             }
         },
-        switchPage: function(page) {
+        switchPage: function (page) {
             if (!this.keepSelectedOnPageChange) {
                 this.$lqForm.removeElement(this.name, 'selected')
             }
@@ -203,43 +207,43 @@ export default Vue.extend({
         changePageSize: function (page_size) {
             this.$lqTable.changePageSize(this.name, page_size);
         },
-        next: function(sendOffset = false, force = false) {
+        next: function (sendOffset = false, force = false) {
             const page = this.currentPage + 1;
             this.$lqTable.switchPage(this.name, page, sendOffset, force);
         },
-        filter: function() {
+        filter: function () {
             const response = this.$lqTable.filter(this.name);
             if (response) {
                 this.emitDataLoaded(response)
             }
         },
-        refresh: function(changePage = false) {
-           const response = this.$lqTable.refresh(this.name, changePage);
-           if (response && changePage) {
+        refresh: function (changePage = false) {
+            const response = this.$lqTable.refresh(this.name, changePage);
+            if (response && changePage) {
                 this.emitDataLoaded(response)
             }
         },
-        updateRow: function(row ) {
+        updateRow: function (row) {
             this.$lqTable.updateRow(this.name, row);
         },
-        deleteRow: function(row) {
+        deleteRow: function (row) {
             this.$lqTable.deleteRow(this.name, row);
         },
-        emitDataLoaded (response) {
+        emitDataLoaded(response) {
             response.then((response) => {
                 this.$emit('initial-data', response)
             })
         }
     },
-    beforeDestroy() { 
+    beforeDestroy() {
         this.$lqTable.deletePagesData(this.name);
         this.$root.$off(this.formName + '_changed');
     },
     watch: {
         staticData: {
-            handler (newStaticData, oldStaticData) {
+            handler(newStaticData, oldStaticData) {
                 if (!isEqual(newStaticData, oldStaticData)) {
-                    this.$store.dispatch('table/addStaticData', {tableName: this.name, data: newStaticData});
+                    this.$store.dispatch('table/addStaticData', { tableName: this.name, data: newStaticData });
                     this.refresh(true);
                 }
             },

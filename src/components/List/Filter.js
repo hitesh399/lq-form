@@ -10,10 +10,10 @@ export default List.extend({
     render: function (createElement) {
         let props = this.$attrs;
         return createElement(
-            this.tag, 
+            this.tag,
             {
                 props
-            }, 
+            },
             this.$scopedSlots.default({
                 items: this.items,
                 model: this.formValues,
@@ -33,9 +33,9 @@ export default List.extend({
     },
 
     methods: {
-        setup: function() {
+        setup: function () {
             this.formName = this.name;
         },
-        destroyedForm: function () {}
+        destroyedForm: function () { }
     }
 })
