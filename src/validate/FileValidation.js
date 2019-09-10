@@ -50,7 +50,7 @@ function fileValidation (value, rules, elementName, values, options) {
     } = rules;
     value = value ? value : {};
     
-    const {file, id, cropped, original} = value;
+    const {id, cropped, file} = value;
 
     let maxFileSizeBytes = maxFileSize ? maxFileSize * 1000000 : null;
     let minFileSizeBytes = minFileSize ? minFileSize * 1000000 : null;	
@@ -59,11 +59,11 @@ function fileValidation (value, rules, elementName, values, options) {
 
     return new Promise(function(resolve) {
 
-        if (!original && !id && required) {
+        if (!file && !id && required) {
             resolve([generateErrorMessage('required', {}, message)]);
             return;
         }
-        if (!original) {
+        if (!file) {
             resolve('')
             return
         }
@@ -86,7 +86,7 @@ function fileValidation (value, rules, elementName, values, options) {
             /**
              * Checking file extensions
              */
-            if (acceptedFilesArr && !checkFileExtensions(acceptedFilesArr, original) ) {
+            if (acceptedFilesArr && !checkFileExtensions(acceptedFilesArr, file) ) {
                 errorRoles.push('file:acceptedFiles')
                 errors.push(generateErrorMessage('acceptedFiles', attribues, message));
             }
@@ -214,7 +214,7 @@ function fileValidation (value, rules, elementName, values, options) {
             
         }
 
-        fReader.readAsDataURL(original);
+        fReader.readAsDataURL(file);
     });
 }
 
