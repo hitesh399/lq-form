@@ -52,8 +52,8 @@ function fileValidation (value, rules, elementName, values, options) {
     
     const {file, id, cropped, original} = value;
 
-    let maxFileSizeBytes = maxFileSize ? maxFileSize*1024*1204 : null;
-    let minFileSizeBytes = minFileSize ? minFileSize*1024*1204 : null;	
+    let maxFileSizeBytes = maxFileSize ? maxFileSize * 1000000 : null;
+    let minFileSizeBytes = minFileSize ? minFileSize * 1000000 : null;	
     let acceptedFilesArr = acceptedFiles ? (helper.isArray(acceptedFiles) ? acceptedFiles : acceptedFiles.split(','))  : null;
     
 
