@@ -110,8 +110,8 @@ function fileValidation (value, rules, elementName, values, options) {
             if(isImage(e.target.result)) {
                 
                 let img = new Image();
-                img.onload = function(imgEvent) { 
-                    const imgE = imgEvent.width ? imgEvent :  imgEvent.path[0];
+                img.onload = function(imgEvent) {
+                    const imgE = imgEvent.srcElement ? imgEvent.srcElement : imgEvent.path[0];
                     /**
                      * Min Dimensions validation
                      */

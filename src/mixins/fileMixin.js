@@ -49,12 +49,9 @@ const fileMixin = {
             for (var i = 0; i < fileLenght; i++) {
                 const file = event.target.files[i];
                 const uid = (Date.now() + i);
-                console.log('I am here index 1232', typeof index)
                 if (index !== undefined) {
-                    console.log('Update 2')
                     this.setValueOnIndex(file, uid, index)
                 } else {
-                    console.log('Update 1')
                     this.setValue(file, uid);
                 }
             }
