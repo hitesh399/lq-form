@@ -237,6 +237,14 @@ export default Vue.extend({
     },
     beforeDestroy() {
         this.$lqTable.deletePagesData(this.name);
+        if (this.type  === 'list') {
+            this.$store.dispatch(
+                'form/removeElement', 
+                { 
+                    formName: this.name, elementName: this.pageKey
+                }
+            );
+        }
         this.$root.$off(this.formName + '_changed');
     },
     watch: {

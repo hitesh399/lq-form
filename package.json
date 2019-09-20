@@ -1,6 +1,6 @@
 {
   "name": "lq-form",
-  "version": "0.1.80",
+  "version": "0.1.81",
   "private": false,
   "scripts": {
     "serve": "vue-cli-service serve src/play/index.js",
@@ -28,7 +28,6 @@
     "@vue/cli-service": "^3.2.0",
     "@vue/test-utils": "^1.0.0-beta.20",
     "chai": "^4.1.2",
-    "element-theme-chalk": "^2.4.11",
     "node-sass": "^4.9.2",
     "sass-loader": "^7.0.3",
     "vue-cli-plugin-element": "^1.0.1",
