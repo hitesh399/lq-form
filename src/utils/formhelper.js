@@ -1,6 +1,7 @@
 // const validate = require('validate.js');
 import cloneDeep from 'lodash/cloneDeep'
 import helper from 'vuejs-object-helper';
+import { EventBus } from '../components/event-bus'
 
 export default {
 
@@ -39,8 +40,11 @@ export  function formHelper (store ) {
      * @param {String} elementName 
      * @param {String} value 
      */
-    this.setElementVal = function (formName, elementName, value, changeInInitial = false) {
-        store.dispatch('form/setElementValue', {formName, elementName, value, changeInInitial: changeInInitial });
+    this.setElementVal = function (formName, elementName, value, notifyGlobaly = true) {
+        store.dispatch('form/setElementValue', {formName, elementName, value});
+        if (notifyGlobaly) {
+            EventBus.$emit(`${formName}.${elementName}.update`, value)
+        }
     }
     /**
      * To set the initialized values

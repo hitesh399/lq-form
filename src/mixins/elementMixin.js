@@ -175,7 +175,7 @@ const formElementMix = {
       // For: Element name should always present in data collecton.
       if(this.makeInItVal !== undefined || value){
         value = !value ? this.makeInItVal : value;
-        this.$lqForm.setElementVal(this.formName, this.id, value)
+        this.$lqForm.setElementVal(this.formName, this.id, value, false)
       }
       else {
         this.$lqForm.removeElement(this.formName, this.id);
