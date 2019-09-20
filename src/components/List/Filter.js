@@ -36,6 +36,7 @@ export default List.extend({
         setup: function () {
             this.formName = this.name;
         },
-        destroyedForm: function () { }
+        destroyedForm: function () { },
+        goingToDestroy: function () { }
     }
 })

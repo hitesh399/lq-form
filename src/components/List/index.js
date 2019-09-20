@@ -233,19 +233,22 @@ export default Vue.extend({
             response.then((response) => {
                 this.$emit('initial-data', response)
             })
+        },
+        goingToDestroy() {
+            this.$lqTable.deletePagesData(this.name);
+            if (this.type === 'list') {
+                this.$store.dispatch(
+                    'form/removeElement',
+                    {
+                        formName: this.name, elementName: this.pageKey
+                    }
+                );
+            }
+            this.$root.$off(this.formName + '_changed');
         }
     },
     beforeDestroy() {
-        this.$lqTable.deletePagesData(this.name);
-        if (this.type  === 'list') {
-            this.$store.dispatch(
-                'form/removeElement', 
-                { 
-                    formName: this.name, elementName: this.pageKey
-                }
-            );
-        }
-        this.$root.$off(this.formName + '_changed');
+        this.goingToDestroy();
     },
     watch: {
         staticData: {
