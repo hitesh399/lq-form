@@ -2,17 +2,17 @@ import helper from 'vuejs-object-helper';
 
 const fileMixin = {
     props: {
-		multiple: {
-			type: Boolean,
-			default: () => { return true; }
-		},
+        multiple: {
+            type: Boolean,
+            default: () => { return true; }
+        },
         thumbs: {
             type: Array,
             default: () => { return null; },
             validator: (value) => {
                 let isValid = true;
                 value.map(function (v) {
-                    if(!helper.isFloat( v.width ) || !helper.isFloat( v.height ) ){
+                    if (!helper.isFloat(v.width) || !helper.isFloat(v.height)) {
                         isValid = false;
                     }
                 })
@@ -37,24 +37,21 @@ const fileMixin = {
     //     }
     // },
     computed: {
-        validateArrayIndex: function() {
+        validateArrayIndex: function () {
             return window.validatejs.isEmpty(this.LQElement) ? false : true;
         }
     },
     methods: {
 
-		handleFileChange: async function(event, index)  {
-            this.$lqForm.touchStatus(this.formName, this.id, true);            
+        handleFileChange: async function (event, index) {
+            this.$lqForm.touchStatus(this.formName, this.id, true);
             const fileLenght = event.target.files.length;
             for (var i = 0; i < fileLenght; i++) {
                 const file = event.target.files[i];
                 const uid = (Date.now() + i);
-                console.log('I am here index 1232', typeof index)
                 if (index !== undefined) {
-                    console.log('Update 2')
                     this.setValueOnIndex(file, uid, index)
                 } else {
-                    console.log('Update 1')
                     this.setValue(file, uid);
                 }
             }
@@ -62,17 +59,17 @@ const fileMixin = {
             this.validate();
         },
         remove: function (elementName) {
-            this.$store.dispatch('form/removeElement', {formName: this.formName, elementName: elementName});
+            this.$store.dispatch('form/removeElement', { formName: this.formName, elementName: elementName });
             this.validate();
         },
         /**
          * To remove Only File Not inded
          */
-        onlyRemoveFile (elementName) {
-            this.$store.dispatch('form/removeElement', {formName: this.formName, elementName: `${elementName}.file`});
-            this.$store.dispatch('form/removeElement', {formName: this.formName, elementName: `${elementName}.original`});
-            this.$store.dispatch('form/removeElement', {formName: this.formName, elementName: `${elementName}.uid`});
-            this.$store.dispatch('form/removeElement', {formName: this.formName, elementName: `${elementName}.status`});
+        onlyRemoveFile(elementName) {
+            this.$store.dispatch('form/removeElement', { formName: this.formName, elementName: `${elementName}.file` });
+            this.$store.dispatch('form/removeElement', { formName: this.formName, elementName: `${elementName}.original` });
+            this.$store.dispatch('form/removeElement', { formName: this.formName, elementName: `${elementName}.uid` });
+            this.$store.dispatch('form/removeElement', { formName: this.formName, elementName: `${elementName}.status` });
             this.validate();
         },
         /**
@@ -91,8 +88,8 @@ const fileMixin = {
             } : defaultValue;
 
             const data = {
-                formName: this.formName, 
-                elementName: this.id, 
+                formName: this.formName,
+                elementName: this.id,
                 value: value
             }
             const action = this.multiple ? 'form/addNewElement' : 'form/setElementValue';
@@ -100,32 +97,32 @@ const fileMixin = {
         },
         setValueOnIndex(file, uid, index) {
             this.$store.dispatch('form/setElementValue', {
-                formName: this.formName, 
+                formName: this.formName,
                 elementName: `${this.id}.${index}.file`,
                 value: file
             });
             this.$store.dispatch('form/setElementValue', {
-                formName: this.formName, 
+                formName: this.formName,
                 elementName: `${this.id}.${index}.original`,
                 value: file
             });
             this.$store.dispatch('form/setElementValue', {
-                formName: this.formName, 
+                formName: this.formName,
                 elementName: `${this.id}.${index}.status`,
                 value: 'ready'
             });
             this.$store.dispatch('form/setElementValue', {
-                formName: this.formName, 
+                formName: this.formName,
                 elementName: `${this.id}.${index}.uid`,
                 value: uid
             });
             this.$store.dispatch('form/setElementValue', {
-                formName: this.formName, 
+                formName: this.formName,
                 elementName: `${this.id}.${index}.cropped`,
                 value: false
             });
         }
-	}
+    }
 }
 
 export default fileMixin;
