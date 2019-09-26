@@ -299,18 +299,21 @@ const formElementMix = {
                     })
                     .catch((errors) => {
                         if (!this.validationCallback) {
+
                             let _error_messages = {};
                             const error_elements = Object.keys(errors);
                             error_elements.forEach((error_element) => {
                                 const elName = error_element.replaceAll('\\', '')
                                 let elErrors = errors[error_element];
                                 let myErrorRules = [];
-
-                                const _last_error = elErrors[elErrors.length - 1];
-                                if (typeof _last_error === 'object' && _last_error.errorRoles) {
-                                    myErrorRules = myErrorRules.concat(_last_error.errorRoles.slice())
-                                    elErrors.splice(-1)
-                                }
+                                elErrors = elErrors.map(function (e) {
+                                    const match = e.toString().match(/(?<=\[\:\:).+(?=\:\:\])/g)
+                                    if (match) {
+                                        myErrorRules.push(match[0])
+                                        e = e.replace(/\[\:\:.+\:\:\]/g, '')
+                                    }
+                                    return e
+                                })
                                 _errorRoles = _errorRoles.concat(myErrorRules)
                                 this.addError(elErrors, elName);
                                 _error_messages[elName] = elErrors
