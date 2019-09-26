@@ -246,7 +246,7 @@ const formElementMix = {
          * Validate the element.
          * @param {Boolean} changeReadyStatus
          */
-        validate: async function (changeReadyStatus = true, forceTest = true) {
+        validate: async function (changeReadyStatus = true, forceTest = true, notify = true) {
             if (!this.lqElRules) {
                 this.removeAllErrors();
                 return;
@@ -255,7 +255,7 @@ const formElementMix = {
                 return;
             }
             if (this.validating && this.validationCallback === null) {
-                this.validationCallback = () => this.validate(changeReadyStatus, forceTest);
+                this.validationCallback = () => this.validate(changeReadyStatus, forceTest, notify);
                 return;
             }
             this.removeAllErrors();
@@ -289,7 +289,9 @@ const formElementMix = {
                             const error_elements = Object.keys(element_values);
                             error_elements.forEach((error_element) => {
                                 const elName = error_element.replaceAll('\\', '')
-                                EventBus.$emit('lq-element-validated-' + this.formName + '-' + elName, null, [])
+                                if (notify) {
+                                    EventBus.$emit('lq-element-validated-' + this.formName + '-' + elName, null, [])
+                                }
                             })
 
                         } else {
@@ -314,10 +316,12 @@ const formElementMix = {
                                     }
                                     return e
                                 })
-                                _errorRoles = _errorRoles.concat(myErrorRules)
+                                _errorRoles = _errorRoles.push({ [elName]: myErrorRules })
                                 this.addError(elErrors, elName);
                                 _error_messages[elName] = elErrors
-                                EventBus.$emit('lq-element-validated-' + this.formName + '-' + elName, elErrors, myErrorRules)
+                                if (notify) {
+                                    EventBus.$emit('lq-element-validated-' + this.formName + '-' + elName, elErrors, myErrorRules)
+                                }
                             })
                             resolve(_error_messages);
                         } else {
@@ -328,7 +332,9 @@ const formElementMix = {
             });
             changeReadyStatus ? this.ready(true) : null;
             this.validatingStatus(false);
-            this.$emit('element-validated', test, _errorRoles);
+            if (notify) {
+                this.$emit('element-validated', test, _errorRoles);
+            }
             return test;
         },
 
