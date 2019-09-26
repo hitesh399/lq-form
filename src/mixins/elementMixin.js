@@ -246,7 +246,7 @@ const formElementMix = {
          * Validate the element.
          * @param {Boolean} changeReadyStatus
          */
-        validate: async function (changeReadyStatus = true, forceTest = true, notify = true) {
+        validate: async function (changeReadyStatus = true, forceTest = true, notify = true, returnRuleAndMessage = false) {
             if (!this.lqElRules) {
                 this.removeAllErrors();
                 return;
@@ -255,7 +255,7 @@ const formElementMix = {
                 return;
             }
             if (this.validating && this.validationCallback === null) {
-                this.validationCallback = () => this.validate(changeReadyStatus, forceTest, notify);
+                this.validationCallback = () => this.validate(changeReadyStatus, forceTest, notify, returnRuleAndMessage);
                 return;
             }
             this.removeAllErrors();
@@ -316,7 +316,7 @@ const formElementMix = {
                                     }
                                     return e
                                 })
-                                _errorRoles = _errorRoles.push({ [elName]: myErrorRules })
+                                _errorRoles.push({ [elName]: myErrorRules })
                                 this.addError(elErrors, elName);
                                 _error_messages[elName] = elErrors
                                 if (notify) {
@@ -335,7 +335,7 @@ const formElementMix = {
             if (notify) {
                 this.$emit('element-validated', test, _errorRoles);
             }
-            return test;
+            return (!returnRuleAndMessage)  ? test : {test, rules: _errorRoles}
         },
 
         /**
