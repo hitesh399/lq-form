@@ -2,6 +2,8 @@ import Vue from 'vue';
 import rForm from '../../mixins/formMixin';
 import helper from 'vuejs-object-helper';
 import { isEqual } from 'lodash/core'
+import { lqFormOptions } from '../../defaultOptions';
+import cloneDeep from 'lodash/cloneDeep'
 
 export default Vue.extend({
     mixins: [rForm],
@@ -48,28 +50,31 @@ export default Vue.extend({
         },
         dataKey: {
             type: [String, Array],
-            default: () => 'data.data'
+            default: () => lqFormOptions.dataKey
         },
         totalKey: {
             type: [String, Array],
-            default: () => 'data.total'
+            default: () => lqFormOptions.totalKey
         },
         primaryKey: {
             type: String,
-            default: () => 'id'
+            default: () => lqFormOptions.primaryKey
         },
         pageSizeKey: {
             type: String,
-            default: () => 'page_size'
+            default: () => lqFormOptions.pageSizeKey
         },
         pageKey: {
             type: String,
-            default: () => 'page'
+            default: () => lqFormOptions.pageKey
         },
-        defaultPageSize: Number,
+        defaultPageSize: {
+            type: Number,
+            default: () => lqFormOptions.pageSize
+        },
         currentPageKey: {
             type: [String, Array],
-            default: () => 'data.current_page'
+            default: () => lqFormOptions.currentPageKey
         },
         type: {
             type: String,
@@ -84,7 +89,7 @@ export default Vue.extend({
             type: String,
             default: () => 'div'
         },
-        autoRefresh: {
+        autoFilter: {
             type: Boolean,
             default: () => true
         },
@@ -110,6 +115,9 @@ export default Vue.extend({
             } else {
                 return this.currentData;
             }
+        },
+        manulFilterValues: function () {
+            return helper.getProp(this.$store.state, ['manualfilter', this.name], {});
         },
         currentPage: function () {
             return helper.getProp(this.$store.state, ['form', this.name, 'values', 'page'], 1);
@@ -139,12 +147,8 @@ export default Vue.extend({
              * Define Form Namne
              */
             this.formName = this.name;
-
-
-            const defaultPageSize = this.defaultPageSize ? this.defaultPageSize : this.$lqFormOptions.pageSize
-            // console.log('defaultPageSize', defaultPageSize)
-            if (defaultPageSize && !this.pageSize) {
-                this.$lqForm.setElementVal(this.name, this.pageSizeKey, defaultPageSize)
+            if (!this.pageSize) {
+                this.$lqForm.setElementVal(this.name, this.pageSizeKey, this.defaultPageSize)
             }
 
             /**
@@ -192,7 +196,7 @@ export default Vue.extend({
             /**
              * Form Element value changes.
              */
-            if (this.autoRefresh) {
+            if (this.autoFilter) {
                 this.$root.$on(this.formName + '_changed', () => {
                     this.$lqTable.filter(this.name);
                 })
@@ -243,6 +247,9 @@ export default Vue.extend({
                         formName: this.name, elementName: this.pageKey
                     }
                 );
+            }
+            if (!this.autoFilter) {
+                this.$store.commit('form/saveValues', { formName: this.name, values: cloneDeep(this.manulFilterValues) })
             }
             this.$root.$off(this.formName + '_changed');
         }
