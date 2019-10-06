@@ -31,8 +31,10 @@ export default Vue.extend({
         clickHandler(event) {
             event.stopPropagation()
             this.$lqTable.filter(this.lqForm.name);
-            const values = this.lqForm.formValues
-            this.$store.dispatch('manualfilter/add', { formName: this.lqForm.name, values })
+            if (!this.lqForm.autoFilter) {
+                const values = this.lqForm.formValues
+                this.$store.dispatch('manualfilter/add', { formName: this.lqForm.name, values })
+            }
         },
         _makeSlotReadyToRender(slots) {
             const slotNames = Object.keys(slots);
