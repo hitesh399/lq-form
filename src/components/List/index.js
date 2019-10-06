@@ -179,6 +179,7 @@ export default Vue.extend({
                     static_data: this.staticData,
                     page_size_key: this.pageSizeKey,
                     page_key: this.pageKey,
+                    auto_filter: this.autoFilter,
                     otherServerData: this.otherServerData
                 }
             })

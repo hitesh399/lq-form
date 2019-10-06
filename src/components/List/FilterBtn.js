@@ -1,4 +1,6 @@
 import Vue from 'vue';
+import helper from 'vuejs-object-helper';
+
 export default Vue.extend({
     name: 'filter-btn',
     props: {
@@ -8,6 +10,11 @@ export default Vue.extend({
         }
     },
     inject: ['lqForm'],
+    computed: {
+        autoFilter: function () {
+            return helper.getProp(this.$store.state, ['table', this.lqForm.name, 'settings', 'auto_filter'], true);
+        },
+    },
     render(h) {
         const self = this;
         return h(
@@ -31,7 +38,7 @@ export default Vue.extend({
         clickHandler(event) {
             event.stopPropagation()
             this.$lqTable.filter(this.lqForm.name);
-            if (!this.lqForm.autoFilter) {
+            if (!this.autoFilter) {
                 const values = this.lqForm.formValues
                 this.$store.dispatch('manualfilter/add', { formName: this.lqForm.name, values })
             }
