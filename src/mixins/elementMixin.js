@@ -309,9 +309,10 @@ const formElementMix = {
                                 let elErrors = errors[error_element];
                                 let myErrorRules = [];
                                 elErrors = elErrors.map(function (e) {
-                                    const match = e.toString().match(/(?<=\[\:\:).+(?=\:\:\])/g)
+                                    const match = e.toString().match(/(\[\:\:)(.+)(\:\:\])/gi)
                                     if (match) {
-                                        myErrorRules.push(match[0])
+                                        const str = match[0].replace('[::', '').replace('::]', '')
+                                        myErrorRules.push(str)
                                         e = e.replace(/\[\:\:.+\:\:\]/g, '')
                                     }
                                     return e
