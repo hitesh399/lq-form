@@ -252,11 +252,11 @@ export default Vue.extend({
             EventBus.$off(`lq-${this.formName}-fetched`, this.emitDataLoaded)
         }
     },
-    restoreManulFilterData(inforToElement = false) {
+    restoreManulFilterData(informToElement = false) {
         if (!this.autoFilterGlobal) {
             this.$store.commit('form/saveValues', { formName: this.name, values: cloneDeep(this.manulFilterValues) });
-            if (inforToElement) {
-                EventBus.$emit(`lq-element-store-update-${this.name}`)
+            if (informToElement) {
+                EventBus.$emit(`lq-form-store-update-${this.name}`)
             }
         }
     },
