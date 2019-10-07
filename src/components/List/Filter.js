@@ -27,7 +27,9 @@ export default List.extend({
                 filter: this.filter,
                 refresh: this.refresh,
                 changePageSize: this.changePageSize,
-                newIds: this.newIds
+                newIds: this.newIds,
+                allFilterApplied: this.allFilterApplied,
+                filterData: this.formData
             })
         )
     },

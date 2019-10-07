@@ -19,6 +19,7 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
 
     const data_key = state[tableName].settings.data_key;
     const total_key = state[tableName].settings.total_key;
+    const auto_filter = state[tableName].settings.auto_filter;
     const type = state[tableName].settings.type;
     const requesting = state[tableName].requesting;
     const otherServerData = state[tableName].settings.otherServerData;
@@ -64,6 +65,13 @@ function fetch(commit, dispatch, request, tableName, state, shouldDataDelete, pa
             key: 'total',
             value: total_from_server ? total_from_server : 0
         });
+        if (!auto_filter) {
+            commit('updateSetting', {
+                tableName,
+                key: 'all_filter_applied',
+                value: true
+            });
+        }
         if (shouldDataDelete) {
             commit('deleteAllData', { tableName });
         }
@@ -155,10 +163,10 @@ const actions = {
         if (changePage === undefined || changePage) {
             this.dispatch(
                 'form/setElementValue', {
-                    formName: tableName + tableFormSuffix,
-                    elementName: page_key,
-                    value: 1
-                }
+                formName: tableName + tableFormSuffix,
+                elementName: page_key,
+                value: 1
+            }
             );
             page = 1;
         }
@@ -173,6 +181,7 @@ const actions = {
         const offset = sendOffset && state[tableName].settings.type === 'list' ? total_loaded_data.length : false
         const request = this.getters['table/request'](tableName, offset);
         const page_key = state[tableName].settings.page_key;
+        const type = state[tableName].settings.type;
         const formValues = this.getters['table/formValues'](tableName);
         const current_page = formValues[page_key] ? formValues[page_key] : 1;
         /**
@@ -180,10 +189,12 @@ const actions = {
          */
 
         commit('updateSetting', { tableName, key: 'prev_page', value: current_page })
-            /**
-             * Updating the current page value
-             */
-        this.dispatch('form/setElementValue', { formName: tableName + tableFormSuffix, elementName: page_key, value: page });
+        /**
+         * Updating the current page value
+         */
+        if (type !== 'table') {
+            this.dispatch('form/setElementValue', { formName: tableName + tableFormSuffix, elementName: page_key, value: page });
+        }
 
         /**
          * Force is true, removing the data from data.
@@ -200,7 +211,13 @@ const actions = {
         /**
          * Action to get the given page data.
          */
-        return fetch(commit, this.dispatch, request, tableName, state, force, page);
+        const response = fetch(commit, this.dispatch, request, tableName, state, force, page);
+        if (response) {
+            response.then(() => {
+                this.dispatch('form/setElementValue', { formName: tableName + tableFormSuffix, elementName: page_key, value: page });
+            })
+        }
+        return response
     },
     changePageSize({ commit, state }, { tableName, page_size }) {
         const request = this.getters['table/request'](tableName);

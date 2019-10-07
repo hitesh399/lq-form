@@ -9,7 +9,7 @@ import { EventBus } from '../event-bus';
 export default Vue.extend({
     mixins: [rForm],
     name: 'r-list',
-    render: function(createElement) {
+    render: function (createElement) {
         let props = this.$attrs;
         const slotProps = {
             model: this.formValues,
@@ -17,29 +17,31 @@ export default Vue.extend({
             filter: this.filter,
             refresh: this.refresh,
             changePageSize: this.changePageSize,
+            allFilterApplied: this.allFilterApplied,
+            filterData: this.formData
         };
-        // console.log('I am her to go', this.$lqFormOptions)
 
         return createElement(
             this.tag, { props }, [
-                this.$scopedSlots['lq.top'] ? this.$scopedSlots['lq.top'](slotProps) : null,
-                this.$scopedSlots.default({
-                    items: this.items,
-                    model: this.formValues,
-                    currentPage: this.currentPage,
-                    previousPage: this.previousPage,
-                    pageSize: this.pageSize,
-                    total: this.total,
-                    requesting: this.requesting,
-                    switchPage: this.switchPage,
-                    next: this.next,
-                    filter: this.filter,
-                    refresh: this.refresh,
-                    changePageSize: this.changePageSize,
-                    newIds: this.newIds
-                }),
-                this.$scopedSlots['lq.bottom'] ? this.$scopedSlots['lq.bottom'](slotProps) : null,
-            ]
+            this.$scopedSlots['lq.top'] ? this.$scopedSlots['lq.top'](slotProps) : null,
+            this.$scopedSlots.default({
+                items: this.items,
+                model: this.formValues,
+                currentPage: this.currentPage,
+                previousPage: this.previousPage,
+                pageSize: this.pageSize,
+                total: this.total,
+                requesting: this.requesting,
+                switchPage: this.switchPage,
+                next: this.next,
+                filter: this.filter,
+                refresh: this.refresh,
+                changePageSize: this.changePageSize,
+                newIds: this.newIds,
+
+            }),
+            this.$scopedSlots['lq.bottom'] ? this.$scopedSlots['lq.bottom'](slotProps) : null,
+        ]
         )
     },
     props: {
@@ -82,7 +84,7 @@ export default Vue.extend({
         },
         keepAlive: {
             type: Boolean,
-            default: function() { return true }
+            default: function () { return true }
         },
         tag: {
             type: String,
@@ -101,50 +103,49 @@ export default Vue.extend({
     },
     computed: {
 
-        currentData: function() {
+        currentData: function () {
             let dataKey = ['table', this.name, 'data'];
             if (this.type === 'table') {
                 dataKey.push('page_' + this.currentPage);
             }
             return helper.getProp(this.$store.state, dataKey, []);
         },
-        items: function() {
-            if (this.type === 'table') {
-                return this.requesting ? this.previousPageData : this.currentData;
-            } else {
-                return this.currentData;
-            }
+        items: function () {
+            return this.currentData;
         },
-        manulFilterValues: function() {
+        manulFilterValues: function () {
             return helper.getProp(this.$store.state, ['manualfilter', this.name], {});
         },
-        currentPage: function() {
+        currentPage: function () {
             return helper.getProp(this.$store.state, ['form', this.name, 'values', 'page'], 1);
         },
-        previousPageData: function() {
+        previousPageData: function () {
             return helper.getProp(this.$store.state, ['table', this.name, 'data', 'page_' + this.previousPage], []);
         },
-        previousPage: function() {
+        previousPage: function () {
             return helper.getProp(this.$store.state, ['table', this.name, 'settings', 'prev_page'], 1);
         },
-        pageSize: function() {
+        pageSize: function () {
             return helper.getProp(this.$store.state, ['form', this.name, 'values', 'page_size'], null);
         },
-        total: function() {
+        total: function () {
             return helper.getProp(this.$store.state, ['table', this.name, 'settings', 'total'], 0);
         },
-        newIds: function() {
+        newIds: function () {
             return helper.getProp(this.$store.state, ['table', this.name, 'settings', 'new_ids'], []);
         },
-        requesting: function() {
+        requesting: function () {
             return helper.getProp(this.$store.state, ['table', this.name, 'requesting'], false);
         },
-        autoFilterGlobal: function() {
+        autoFilterGlobal: function () {
             return helper.getProp(this.$store.state, ['table', this.name, 'settings', 'auto_filter'], true);
+        },
+        allFilterApplied: function () {
+            return helper.getProp(this.$store.state, ['table', this.name, 'settings', 'all_filter_applied'], true);
         }
     },
     methods: {
-        setup: function() {
+        setup: function () {
             /**
              * Define Form Namne
              */
@@ -184,6 +185,7 @@ export default Vue.extend({
                     page_size_key: this.pageSizeKey,
                     page_key: this.pageKey,
                     auto_filter: this.autoFilter,
+                    all_filter_applied: true,
                     otherServerData: this.otherServerData
                 }
             })
@@ -198,40 +200,49 @@ export default Vue.extend({
             /**
              * Form Element value changes.
              */
-            if (this.autoFilterGlobal) {
-                this.$root.$on(this.formName + '_changed', this.filter)
-            }
+            EventBus.$on(this.formName + '_changed', this.applyAutoFilter)
             EventBus.$on(`lq-${this.formName}-fetched`, this.emitDataLoaded)
         },
-        switchPage: function(page) {
+        applyAutoFilter() {
+            if (this.autoFilterGlobal) {
+                this.filter()
+            } else {
+                this.$store.commit('table/updateSetting', {
+                    tableName: this.name,
+                    key: 'all_filter_applied',
+                    value: false
+                }
+                )
+            }
+        },
+        switchPage: function (page) {
             this.restoreManulFilterData(true);
             if (!this.keepSelectedOnPageChange) {
                 this.$lqForm.removeElement(this.name, 'selected')
             }
             this.$lqTable.switchPage(this.name, page);
         },
-        changePageSize: function(page_size) {
-            this.restoreManulFilterData(true);
+        changePageSize: function (page_size) {
             this.$lqTable.changePageSize(this.name, page_size);
         },
-        next: function(sendOffset = false, force = false) {
+        next: function (sendOffset = false, force = false) {
             this.restoreManulFilterData(true);
             const page = this.currentPage + 1;
             this.$lqTable.switchPage(this.name, page, sendOffset, force);
         },
-        filter: function() {
+        filter: function () {
             this.$lqTable.filter(this.name);
             this.transferManulFilterData()
         },
 
-        refresh: function(changePage = false) {
+        refresh: function (changePage = false) {
             this.$lqTable.refresh(this.name, changePage);
             this.transferManulFilterData()
         },
-        updateRow: function(row) {
+        updateRow: function (row) {
             this.$lqTable.updateRow(this.name, row);
         },
-        deleteRow: function(row) {
+        deleteRow: function (row) {
             this.$lqTable.deleteRow(this.name, row);
         },
         emitDataLoaded(response) {
@@ -242,29 +253,29 @@ export default Vue.extend({
             if (this.type === 'list') {
                 this.$store.dispatch(
                     'form/removeElement', {
-                        formName: this.name,
-                        elementName: this.pageKey
-                    }
+                    formName: this.name,
+                    elementName: this.pageKey
+                }
                 );
             }
             this.restoreManulFilterData()
-            this.$root.$off(this.formName + '_changed', this.filter);
+            EventBus.$off(this.formName + '_changed', this.applyAutoFilter);
             EventBus.$off(`lq-${this.formName}-fetched`, this.emitDataLoaded)
-        }
-    },
-    restoreManulFilterData(informToElement = false) {
-        if (!this.autoFilterGlobal) {
-            this.$store.commit('form/saveValues', { formName: this.name, values: cloneDeep(this.manulFilterValues) });
-            if (informToElement) {
-                EventBus.$emit(`lq-form-store-update-${this.name}`)
+        },
+        restoreManulFilterData(informToElement = false) {
+            if (!this.autoFilterGlobal && !this.allFilterApplied) {
+                this.$store.commit('form/saveValues', { formName: this.name, values: cloneDeep(this.manulFilterValues) });
+                if (informToElement) {
+                    EventBus.$emit(`lq-form-store-update-${this.name}`)
+                }
             }
-        }
-    },
-    transferManulFilterData() {
-        if (!this.autoFilterGlobal) {
-            const values = this.formValues
-            this.$store.dispatch('manualfilter/add', { formName: this.name, values })
-        }
+        },
+        transferManulFilterData() {
+            if (!this.autoFilterGlobal) {
+                const values = this.formValues
+                this.$store.dispatch('manualfilter/add', { formName: this.name, values })
+            }
+        },
     },
     beforeDestroy() {
         this.goingToDestroy();

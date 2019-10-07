@@ -162,7 +162,7 @@ const formElementMix = {
             return this.LQElement || this.LQElement === undefined ? this.LQElement : defulatValue;
         },
 
-        setValue: function (value, informToroot = true, checkValidation = true) {
+        setValue: function (value, broadcast = true, checkValidation = true) {
 
             if (!this.lqElRules && this.elError) {
                 this.removeError();
@@ -180,8 +180,8 @@ const formElementMix = {
             else {
                 this.$lqForm.removeElement(this.formName, this.id);
             }
-            if (informToroot) {
-                this.$root.$emit(this.formName + '_changed');
+            if (broadcast) {
+                EventBus.$emit(this.formName + '_changed')
             }
             /**
              * Check validation rules.
