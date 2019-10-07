@@ -4,11 +4,12 @@ import helper from 'vuejs-object-helper';
 import { isEqual } from 'lodash/core'
 import { lqFormOptions } from '../../defaultOptions';
 import cloneDeep from 'lodash/cloneDeep'
+import { EventBus } from '../event-bus';
 
 export default Vue.extend({
     mixins: [rForm],
     name: 'r-list',
-    render: function (createElement) {
+    render: function(createElement) {
         let props = this.$attrs;
         const slotProps = {
             model: this.formValues,
@@ -20,9 +21,7 @@ export default Vue.extend({
         // console.log('I am her to go', this.$lqFormOptions)
 
         return createElement(
-            this.tag,
-            { props },
-            [
+            this.tag, { props }, [
                 this.$scopedSlots['lq.top'] ? this.$scopedSlots['lq.top'](slotProps) : null,
                 this.$scopedSlots.default({
                     items: this.items,
@@ -83,7 +82,7 @@ export default Vue.extend({
         },
         keepAlive: {
             type: Boolean,
-            default: function () { return true }
+            default: function() { return true }
         },
         tag: {
             type: String,
@@ -102,47 +101,50 @@ export default Vue.extend({
     },
     computed: {
 
-        currentData: function () {
+        currentData: function() {
             let dataKey = ['table', this.name, 'data'];
             if (this.type === 'table') {
                 dataKey.push('page_' + this.currentPage);
             }
             return helper.getProp(this.$store.state, dataKey, []);
         },
-        items: function () {
+        items: function() {
             if (this.type === 'table') {
                 return this.requesting ? this.previousPageData : this.currentData;
             } else {
                 return this.currentData;
             }
         },
-        manulFilterValues: function () {
+        manulFilterValues: function() {
             return helper.getProp(this.$store.state, ['manualfilter', this.name], {});
         },
-        currentPage: function () {
+        currentPage: function() {
             return helper.getProp(this.$store.state, ['form', this.name, 'values', 'page'], 1);
         },
-        previousPageData: function () {
+        previousPageData: function() {
             return helper.getProp(this.$store.state, ['table', this.name, 'data', 'page_' + this.previousPage], []);
         },
-        previousPage: function () {
+        previousPage: function() {
             return helper.getProp(this.$store.state, ['table', this.name, 'settings', 'prev_page'], 1);
         },
-        pageSize: function () {
+        pageSize: function() {
             return helper.getProp(this.$store.state, ['form', this.name, 'values', 'page_size'], null);
         },
-        total: function () {
+        total: function() {
             return helper.getProp(this.$store.state, ['table', this.name, 'settings', 'total'], 0);
         },
-        newIds: function () {
+        newIds: function() {
             return helper.getProp(this.$store.state, ['table', this.name, 'settings', 'new_ids'], []);
         },
-        requesting: function () {
+        requesting: function() {
             return helper.getProp(this.$store.state, ['table', this.name, 'requesting'], false);
+        },
+        autoFilterGlobal: function() {
+            return helper.getProp(this.$store.state, ['table', this.name, 'settings', 'auto_filter'], true);
         }
     },
     methods: {
-        setup: function () {
+        setup: function() {
             /**
              * Define Form Namne
              */
@@ -158,7 +160,8 @@ export default Vue.extend({
             this.ready(true);
             this.submiting(false);
             this.$store.dispatch('form/addSettings', {
-                formName: this.formName, settings: {
+                formName: this.formName,
+                settings: {
                     transformKeys: this.transformKeys,
                     extraDataKeys: [this.pageSizeKey, this.pageKey].concat(this.extraDataKeys ? this.extraDataKeys : []),
                     submit: this.submit,
@@ -170,7 +173,8 @@ export default Vue.extend({
              * Store table setting data in state
              */
             this.$store.dispatch('table/updateSettings', {
-                tableName: this.name, settings: {
+                tableName: this.name,
+                settings: {
                     data_key: this.dataKey,
                     total_key: this.totalKey,
                     current_page_key: this.currentPageKey,
@@ -188,71 +192,78 @@ export default Vue.extend({
              * Request to server
              */
             this.$nextTick(() => {
-                const response = this.$store.dispatch('table/get', { tableName: this.name });
-                if (response) {
-                    this.emitDataLoaded(response)
-                }
+                this.$store.dispatch('table/get', { tableName: this.name });
             })
 
             /**
              * Form Element value changes.
              */
-            if (this.autoFilter) {
-                this.$root.$on(this.formName + '_changed', () => {
-                    this.$lqTable.filter(this.name);
-                })
+            if (this.autoFilterGlobal) {
+                this.$root.$on(this.formName + '_changed', this.filter)
             }
+            EventBus.$on(`lq-${this.formName}-fetched`, this.emitDataLoaded)
         },
-        switchPage: function (page) {
+        switchPage: function(page) {
+            this.restoreManulFilterData(true);
             if (!this.keepSelectedOnPageChange) {
                 this.$lqForm.removeElement(this.name, 'selected')
             }
             this.$lqTable.switchPage(this.name, page);
         },
-        changePageSize: function (page_size) {
+        changePageSize: function(page_size) {
+            this.restoreManulFilterData(true);
             this.$lqTable.changePageSize(this.name, page_size);
         },
-        next: function (sendOffset = false, force = false) {
+        next: function(sendOffset = false, force = false) {
+            this.restoreManulFilterData(true);
             const page = this.currentPage + 1;
             this.$lqTable.switchPage(this.name, page, sendOffset, force);
         },
-        filter: function () {
-            const response = this.$lqTable.filter(this.name);
-            if (response) {
-                this.emitDataLoaded(response)
-            }
+        filter: function() {
+            this.$lqTable.filter(this.name);
+            this.transferManulFilterData()
         },
-        refresh: function (changePage = false) {
-            const response = this.$lqTable.refresh(this.name, changePage);
-            if (response && changePage) {
-                this.emitDataLoaded(response)
-            }
+
+        refresh: function(changePage = false) {
+            this.$lqTable.refresh(this.name, changePage);
+            this.transferManulFilterData()
         },
-        updateRow: function (row) {
+        updateRow: function(row) {
             this.$lqTable.updateRow(this.name, row);
         },
-        deleteRow: function (row) {
+        deleteRow: function(row) {
             this.$lqTable.deleteRow(this.name, row);
         },
         emitDataLoaded(response) {
-            response.then((response) => {
-                this.$emit('initial-data', response)
-            })
+            this.$emit('data-loaded', response)
         },
         goingToDestroy() {
             this.$lqTable.deletePagesData(this.name);
             if (this.type === 'list') {
                 this.$store.dispatch(
-                    'form/removeElement',
-                    {
-                        formName: this.name, elementName: this.pageKey
+                    'form/removeElement', {
+                        formName: this.name,
+                        elementName: this.pageKey
                     }
                 );
             }
-            if (!this.autoFilter) {
-                this.$store.commit('form/saveValues', { formName: this.name, values: cloneDeep(this.manulFilterValues) })
+            this.restoreManulFilterData()
+            this.$root.$off(this.formName + '_changed', this.filter);
+            EventBus.$off(`lq-${this.formName}-fetched`, this.emitDataLoaded)
+        }
+    },
+    restoreManulFilterData(inforToElement = false) {
+        if (!this.autoFilterGlobal) {
+            this.$store.commit('form/saveValues', { formName: this.name, values: cloneDeep(this.manulFilterValues) });
+            if (inforToElement) {
+                EventBus.$emit(`lq-element-store-update-${this.name}`)
             }
-            this.$root.$off(this.formName + '_changed');
+        }
+    },
+    transferManulFilterData() {
+        if (!this.autoFilterGlobal) {
+            const values = this.formValues
+            this.$store.dispatch('manualfilter/add', { formName: this.name, values })
         }
     },
     beforeDestroy() {
