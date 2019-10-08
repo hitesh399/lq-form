@@ -31,7 +31,7 @@ export default {
 					return field ? true : false;
 				}
 				else {
-					field && field.authority !== 'read' ? false : true;
+					return field && field.authority !== 'read' ? false : true;
 				}
 			}
 			return true;
@@ -59,18 +59,29 @@ export default {
 			}
 			return data;
 		},
+		shouldDisabled: function () {
+			const authority = this.fieldAuthority;
+			return (authority === 'read');
+		},
+		/**
+		 * To check the element disability
+		 */
+		isDisabled: function () {
+			return this.shouldDisabled || this.disabled;
+		},
+		/**
+		 * To check that should the current element display ?
+		 */
+		isShow: function () {
+			return (this.fieldAuthority !== 'hide' && this.hasAccess);
+		}
 	},
-
-	/**
-	 * To check the element disability
-	 */
-	active: function () {
-		return this.shouldDisabled || this.disabled ? false : true;
-	},
-	/**
-	 * To check that should the current element display ?
-	 */
-	show: function () {
-		return (this.fieldAuthority !== 'hide' && this.hasAccess);
+	watch: {
+		hasAccess: {
+			handler(newValue) {
+				helper.setProp(this.lqForm.elementVisibility, this[this.elementIdKey], newValue)
+			},
+			immediate: true
+		}
 	}
 }

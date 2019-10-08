@@ -40,7 +40,8 @@ const formMixin = {
 	data: function () {
 		return {
 			formName: null,
-			renderComponent: true
+			renderComponent: true,
+			elementVisibility: {}
 		}
 	},
 	provide() {
@@ -220,6 +221,9 @@ const formMixin = {
 				return false;
 			}
 			return true;
+		},
+		canShow(elementName) {
+			return this.elementVisibility[elementName] || this.elementVisibility[elementName] === undefined
 		},
 		touchStatus: function (elementName, status) {
 			this.$lqForm.touchStatus(this.formName, elementName, status);
