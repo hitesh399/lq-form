@@ -206,8 +206,16 @@ const actions = {
          */
         const has_pages = this.getters['table/hasPages'](tableName);
         // console.log('has_pages', has_pages, page)
-        if (has_pages.includes('page_' + page) && !force) return;
-
+        if (has_pages.includes('page_' + page) && !force) {
+            this.dispatch(
+                'form/setElementValue', 
+                { 
+                    formName: tableName + tableFormSuffix, 
+                    elementName: page_key, value: page 
+                }
+            );
+            return;
+        }
         /**
          * Action to get the given page data.
          */
