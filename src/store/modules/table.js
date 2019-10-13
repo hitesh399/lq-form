@@ -131,7 +131,8 @@ const getters = {
     formValues: (state, getters, rootState, rootGetters) => (tableName) => {
         return Formhelper.formData(tableName + tableFormSuffix, rootGetters);
     },
-    request: (state, getters, rootState, rootGetters) => (tableName, offset) => {
+    request: (state, getters, rootState, rootGetters) => (tableName, offset, page) => {
+        const page_key = state[tableName].settings.page_key;
         let static_data = cloneDeep(
             helper.getProp(
                 state, [tableName, 'settings', 'static_data'], {}
@@ -139,6 +140,9 @@ const getters = {
         );
         if (offset !== false && offset !== undefined) {
             static_data.offset = offset
+        }
+        if (page) {
+            static_data[page_key] = page
         }
         return (cancel) => Formhelper.submit(tableName + tableFormSuffix, static_data, false, rootGetters, cancel);
     },
@@ -179,7 +183,7 @@ const actions = {
     switchPage({ commit, state }, { tableName, page, sendOffset, force }) {
         const total_loaded_data = state[tableName].data ? state[tableName].data : []
         const offset = sendOffset && state[tableName].settings.type === 'list' ? total_loaded_data.length : false
-        const request = this.getters['table/request'](tableName, offset);
+        const request = this.getters['table/request'](tableName, offset, page);
         const page_key = state[tableName].settings.page_key;
         const type = state[tableName].settings.type;
         const formValues = this.getters['table/formValues'](tableName);
@@ -192,9 +196,9 @@ const actions = {
         /**
          * Updating the current page value
          */
-        if (type !== 'table') {
-            this.dispatch('form/setElementValue', { formName: tableName + tableFormSuffix, elementName: page_key, value: page });
-        }
+        // if (type !== 'table') {
+        //     this.dispatch('form/setElementValue', { formName: tableName + tableFormSuffix, elementName: page_key, value: page });
+        // }
 
         /**
          * Force is true, removing the data from data.
