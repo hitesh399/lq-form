@@ -36,6 +36,10 @@ const formMixin = {
 		},
 		rules: Object,
 		extraDataKeys: Array,
+		disabled: {
+			type: Boolean,
+			default: function () { return false }
+		}
 	},
 	data: function () {
 		return {

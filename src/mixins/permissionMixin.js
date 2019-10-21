@@ -67,7 +67,7 @@ export default {
 		 * To check the element disability
 		 */
 		isDisabled: function () {
-			return this.shouldDisabled || this.disabled;
+			return this.shouldDisabled || this.disabled || this.lqForm.disabled;
 		},
 		/**
 		 * To check that should the current element display ?
