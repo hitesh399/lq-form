@@ -69,7 +69,6 @@ function fileValidation(value, rules, elementName, values, options) {
             return
         }
         let errors = [];
-        let errorRoles = [];
         if (max) {
             let nameArr = elementName.split('\.');
             let valueIndex = parseInt(nameArr.splice(nameArr.length - 1, 1)[0]) + 1;
@@ -174,7 +173,7 @@ function fileValidation(value, rules, elementName, values, options) {
                         errors.push(generateErrorMessage('imageWidthHeight', attribues, message));
                     }
 
-                    if (crop && !id && !cropped) {
+                    if (crop && !cropped) {
                         errors.push(generateErrorMessage('crop', null, message));
                     }
                     /**
