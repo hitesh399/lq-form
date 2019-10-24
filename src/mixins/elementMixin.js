@@ -246,16 +246,16 @@ const formElementMix = {
          * Validate the element.
          * @param {Boolean} changeReadyStatus
          */
-        validate: async function (changeReadyStatus = true, forceTest = true, notify = true, returnRuleAndMessage = false) {
+        validate: async function (changeReadyStatus = true, onlyTouchedTest = true, notify = true, returnRuleAndMessage = false) {
             if (!this.lqElRules) {
                 this.removeAllErrors();
                 return;
             }
-            if (!this.touch && forceTest) {
+            if (!this.touch && onlyTouchedTest) {
                 return;
             }
             if (this.validating && this.validationCallback === null) {
-                this.validationCallback = () => this.validate(changeReadyStatus, forceTest, notify, returnRuleAndMessage);
+                this.validationCallback = () => this.validate(changeReadyStatus, onlyTouchedTest, notify, returnRuleAndMessage);
                 return;
             }
             this.removeAllErrors();
