@@ -9,8 +9,9 @@ import errorLang from './fileErrorLang';
  * @param {String | Function} message 
  */
 export function generateErrorMessage(type, attribues, message) {
+    let error_rule = '[::file:' + type + '::]'
     if (message) {
-        let error_rule = '[::file:' + type + '::]'
+        
         if (typeof message === 'function') {
             return message(type, attribues) + error_rule;
         } else if (typeof message === 'object') {

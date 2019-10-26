@@ -253,7 +253,7 @@ const formMixin = {
 			shouldEmitEvents = shouldEmitEvents === undefined ? true : shouldEmitEvents;
 			if (!this.canSubmit()) {
 				this.$root.$emit('can-not-submit', this);
-				return;
+				return Promise.reject({reason: 'can-not-submit'})
 			}
 			this.$lqForm.removeErrors(this.formName);
 
@@ -262,7 +262,7 @@ const formMixin = {
 			if (this.hasError()) {
 				this.$root.$emit('has-error', this);
 				this.$emit('errors', this)
-				return;
+				return Promise.reject({reason: 'loacl-error'})
 			}
 
 			let data = this.formData;
