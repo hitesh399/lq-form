@@ -9,7 +9,9 @@ module.exports = {
 	      'validate.js': 'validate.js',
 	      'vuex': 'vuex',
 	      'vuejs-object-helper': 'vuejs-object-helper',
-	      'vue': 'vue'
+	      'vue': 'vue',
+	      'lodash/cloneDeep': 'lodash/cloneDeep',
+	      'lodash/core': 'lodash/core',
 	    }
 	}
  }

@@ -117,7 +117,7 @@ export default Vue.extend({
             return helper.getProp(this.$store.state, ['manualfilter', this.name], {});
         },
         currentPage: function () {
-            return helper.getProp(this.$store.state, ['form', this.name, 'values', 'page'], 1);
+            return helper.getProp(this.$store.state, `form.${this.name}.values.${this.pageKey}`, 1);
         },
         previousPageData: function () {
             return helper.getProp(this.$store.state, ['table', this.name, 'data', 'page_' + this.previousPage], []);
@@ -126,10 +126,10 @@ export default Vue.extend({
             return helper.getProp(this.$store.state, ['table', this.name, 'settings', 'prev_page'], 1);
         },
         pageSize: function () {
-            return helper.getProp(this.$store.state, ['form', this.name, 'values', 'page_size'], null);
+            return helper.getProp(this.$store.state, `form.${this.name}.values.${this.pageSizeKey}`, null);
         },
         total: function () {
-            return helper.getProp(this.$store.state, ['table', this.name, 'settings', 'total'], 0);
+            return helper.getProp(this.$store.state, `form.${this.name}.values.${this.totalKey}`, 0);
         },
         newIds: function () {
             return helper.getProp(this.$store.state, ['table', this.name, 'settings', 'new_ids'], []);
