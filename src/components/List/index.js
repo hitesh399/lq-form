@@ -129,7 +129,7 @@ export default Vue.extend({
             return helper.getProp(this.$store.state, `form.${this.name}.values.${this.pageSizeKey}`, null);
         },
         total: function () {
-            return helper.getProp(this.$store.state, `form.${this.name}.values.${this.totalKey}`, 0);
+            return helper.getProp(this.$store.state, ['table', this.name, 'settings', 'total'], 0);
         },
         newIds: function () {
             return helper.getProp(this.$store.state, ['table', this.name, 'settings', 'new_ids'], []);
