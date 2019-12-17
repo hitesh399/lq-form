@@ -192,7 +192,7 @@ export function formHelper(store) {
             helper.setProp(data, extraKey, val);
         });
         // Replace the object key name.
-        this.transformDataKey(data, transformKeys, fields);
+        this.transformDataKey(data, transformKeys, fields, extraDataKeys);
         return data;
     }
     /**
@@ -208,14 +208,15 @@ export function formHelper(store) {
     /**
      * To Replace the Object key
      */
-    this.transformDataKey = function (data, transformKeys, fields) {
+    this.transformDataKey = function (data, transformKeys, fields, extraDataKeys) {
         if (!transformKeys) return;
         transformKeys.forEach((tk) => {
             const keys = tk.split(':');
+
             if (keys.length === 2) {
                 const dataKeyFrom = keys[0];
                 const dataKeyto = keys[1];
-                if (fields[dataKeyFrom]) {
+                if (fields[dataKeyFrom] || (extraDataKeys && extraDataKeys.includes(dataKeyFrom)) ) {
                     if (helper.getProp(data, dataKeyFrom)) {
                         const val = helper.getProp(data, dataKeyFrom);
                         helper.deleteProp(data, dataKeyFrom);

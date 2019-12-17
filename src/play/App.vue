@@ -1,7 +1,7 @@
 <template>
     <div id="app">
         <h1>Hi I am here to play </h1>
-        <lq-list name="user_" action="https://api.github.com/users" :data-key="null" :static-data="staticData">
+        <lq-list name="user_" action="https://api.github.com/users" :defaultPageSize="30" :transformKeys="['page_size:_page_re']" :data-key="null" :static-data="staticData">
             <template slot-scope="scope">
                 <p v-for="(item, index) in scope.items" :key="`test_${index}`">
                     {{item.login}} {{item.id}} {{scope.newIds}}
