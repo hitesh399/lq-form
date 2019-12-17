@@ -13,6 +13,7 @@ const formMixin = {
 			type: Boolean,
 			default: function () { return false; }
 		},
+		transformKeys: Array,
 		scrollToErrorField: {
 			type: Boolean,
 			default: () => true
