@@ -254,7 +254,7 @@ const formMixin = {
 			shouldEmitEvents = shouldEmitEvents === undefined ? true : shouldEmitEvents;
 			if (!this.canSubmit()) {
 				this.$root.$emit('can-not-submit', this);
-				return Promise.reject({reason: 'can-not-submit'})
+				return Promise.reject({ reason: 'can-not-submit' })
 			}
 			this.$lqForm.removeErrors(this.formName);
 
@@ -263,7 +263,7 @@ const formMixin = {
 			if (this.hasError()) {
 				this.$root.$emit('has-error', this);
 				this.$emit('errors', this)
-				return Promise.reject({reason: 'loacl-error'})
+				return Promise.reject({ reason: 'loacl-error' })
 			}
 
 			let data = this.formData;
@@ -310,10 +310,24 @@ const formMixin = {
 						this.$root.$emit('submited-error', error, this);
 					}
 					if (helper.getProp(error, 'response.status') === 422 && this.displayInlineError) {
-						this.addErrors(error.response.data.errors);
-						const error_field = helper.getProp(error, 'response.data.errors', {});
-						const error_field_names = error_field ? Object.keys(error_field) : [];
-
+						// transformKeys
+						let errors = helper.getProp(error, 'response.data.errors', {})
+						if (this.transformKeys) {
+							this.transformKeys.forEach(tk => {
+								const keys = tk.split(':');
+								if (keys.length === 2) {
+									const dataKeyFrom = keys[1];
+									const dataKeyto = keys[0];
+									const error_val = helper.getProp(errors, dataKeyFrom);
+									if (error_val) {
+										helper.deleteProp(errors, dataKeyFrom);
+										helper.setProp(errors, dataKeyto, error_val)
+									} 
+								}
+							})
+						}
+						this.addErrors(errors);
+						const error_field_names = Object.keys(errors)
 						if (error_field_names.length && this.scrollToErrorField) {
 							const element = document.getElementById(error_field_names[0]);
 							element ? element.scrollIntoView() : null;
