@@ -310,7 +310,7 @@ const formMixin = {
 						this.$root.$emit('submited-error', error, this);
 					}
 					if (helper.getProp(error, 'response.status') === 422 && this.displayInlineError) {
-						// transformKeys
+
 						let errors = helper.getProp(error, 'response.data.errors', {})
 						if (this.transformKeys) {
 							this.transformKeys.forEach(tk => {
@@ -322,7 +322,7 @@ const formMixin = {
 									if (error_val) {
 										helper.deleteProp(errors, dataKeyFrom);
 										helper.setProp(errors, dataKeyto, error_val)
-									} 
+									}
 								}
 							})
 						}
