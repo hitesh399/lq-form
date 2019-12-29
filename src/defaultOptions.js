@@ -6,7 +6,19 @@ const lqFormOptions = {
         primaryKey: 'id',
         pageSizeKey: 'page_size',
         pageKey: 'page',
-        currentPageKey: 'data.current_page'
+        currentPageKey: 'data.current_page',
+        formErrorKey: 'response.data.errors',
+        axiosConfig: {},
+        afterRequestResolved: null
+    },
+    get formErrorKey() {
+        return this.options.formErrorKey
+    },
+    get afterRequestResolved() {
+        return this.options.afterRequestResolved
+    },
+    get axiosConfig() {
+        return this.options.axiosConfig
     },
     get pageSize() {
         return this.options.pageSize
@@ -30,10 +42,7 @@ const lqFormOptions = {
         return this.options.currentPageKey
     },
     merge: function (options) {
-        this.options = {
-            ...this.options,
-            ...this.extractOptions(options)
-        }
+        this.options = Object.assign({}, this.options, this.extractOptions(options))
     },
     extractOptions(attrs) {
         const option_keys = Object.keys(this.options)

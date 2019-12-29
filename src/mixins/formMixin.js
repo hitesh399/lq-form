@@ -1,6 +1,7 @@
 import helper from 'vuejs-object-helper';
 import cloneDeep from 'lodash/cloneDeep'
 import axios from 'axios'
+import { lqFormOptions } from '../defaultOptions'
 
 const formMixin = {
 
@@ -31,7 +32,7 @@ const formMixin = {
 			type: String,
 			default: () => 'json'
 		},
-		displayInlineError: {
+		autoAssignErrors: {
 			type: Boolean,
 			default: function () { return true }
 		},
@@ -40,6 +41,10 @@ const formMixin = {
 		disabled: {
 			type: Boolean,
 			default: function () { return false }
+		},
+		errorKey: {
+			type: [String, Array],
+			default: () => lqFormOptions.formErrorKey
 		}
 	},
 	data: function () {
@@ -95,6 +100,10 @@ const formMixin = {
 
 			return helper.getProp(this.$store.state.form, `${this.formName}.isReady`, true);
 		},
+		dirty: function () {
+
+			return helper.getProp(this.$store.state.form, `${this.formName}.settings.dirty`, false);
+		},
 		isSubmiting: function () {
 
 			return helper.getProp(this.$store.state.form, `${this.formName}.isSubmiting`, false);
@@ -129,7 +138,8 @@ const formMixin = {
 					transformKeys: this.transformKeys,
 					extraDataKeys: this.extraDataKeys,
 					submit: this.submit,
-					test: this.validate
+					test: this.validate,
+					dirty: false
 				}
 			});
 		},
@@ -266,39 +276,52 @@ const formMixin = {
 				return Promise.reject({ reason: 'loacl-error' })
 			}
 
+			const _method = this.requestMethod.toString().toLowerCase()
+			const CancelToken = axios.CancelToken;
+
+			let axiosConfig = {
+				url: this.action,
+				method: this.requestMethod,
+				cancelToken: typeof cancle === 'function' ? new CancelToken(cancle) : undefined
+			}
+
 			let data = this.formData;
 			if (more_data) {
 				data = { ...data, ...more_data };
 			}
+
+			/**
+			 * Assign Data In Config 
+			 */
+
+			if (_method === 'get') {
+				axiosConfig.params = data
+				axios.paramsSerializer = (params) => helper.objectToQueryString(params)
+			} else {
+				axiosConfig.data = (this.contentType === 'formdata') ? helper.objectToFormData(data) : data
+			}
+
+
 			// When form data is valid
 			if (!this.action || !this.$axios) {
-				console.warn('You must have to define the action in form props and $axios as vue property.')
+				console.error('You must have to define the action in form props and $axios as vue property.')
 				return;
 			}
 			this.submiting(true);
-			if (this.contentType === 'formdata' && this.requestMethod === 'GET') {
-				console.warn('For get Method fordata is not possible.');
+			if (this.contentType === 'formdata' && _method === 'GET') {
+				console.error('For get Method formdata is not possible.');
 				return;
 			}
-			if (this.contentType === 'formdata') {
-				data = helper.objectToFormData(data);
-			}
-			let url = this.action;
-			if (this.requestMethod === 'GET') {
-				url += '?' + helper.objectToQueryString(data)
-			}
-			const CancelToken = axios.CancelToken;
-			return this.$axios({
-				url: url,
-				method: this.requestMethod,
-				data,
-				cancelToken: typeof cancle === 'function' ? new CancelToken(cancle) : undefined
-			})
+
+			return this.$axios(axiosConfig)
 				.then((response) => {
 					this.submiting(false);
 					if (shouldEmitEvents) {
 						this.$emit('submited-success', response, this);
 						this.$root.$emit('submited-success', response, this);
+					}
+					if (typeof lqFormOptions.afterRequestResolved === 'function') {
+						lqFormOptions.afterRequestResolved.call(this, response)
 					}
 					return Promise.resolve(response);
 				})
@@ -309,23 +332,13 @@ const formMixin = {
 						this.$emit('submited-error', error, this);
 						this.$root.$emit('submited-error', error, this);
 					}
-					if (helper.getProp(error, 'response.status') === 422 && this.displayInlineError) {
+					if (typeof lqFormOptions.afterRequestResolved === 'function') {
+						lqFormOptions.afterRequestResolved.call(this, error)
+					}
+					if (helper.getProp(error, 'response.status') === 422 && this.autoAssignErrors) {
 
-						let errors = helper.getProp(error, 'response.data.errors', {})
-						if (this.transformKeys) {
-							this.transformKeys.forEach(tk => {
-								const keys = tk.split(':');
-								if (keys.length === 2) {
-									const dataKeyFrom = keys[1];
-									const dataKeyto = keys[0];
-									const error_val = helper.getProp(errors, dataKeyFrom);
-									if (error_val) {
-										helper.deleteProp(errors, dataKeyFrom);
-										helper.setProp(errors, dataKeyto, error_val)
-									}
-								}
-							})
-						}
+						let errors = helper.getProp(error, this.formErrorKey, {})
+						this.compliesErrors(errors)
 						this.addErrors(errors);
 						const error_field_names = Object.keys(errors)
 						if (error_field_names.length && this.scrollToErrorField) {
@@ -335,6 +348,22 @@ const formMixin = {
 					}
 					return Promise.reject(error)
 				})
+		},
+		compliesErrors(errors) {
+			if (this.transformKeys) {
+				this.transformKeys.forEach(tk => {
+					const keys = tk.split(':');
+					if (keys.length === 2) {
+						const dataKeyFrom = keys[1];
+						const dataKeyto = keys[0];
+						const error_val = helper.getProp(errors, dataKeyFrom);
+						if (error_val) {
+							helper.deleteProp(errors, dataKeyFrom);
+							helper.setProp(errors, dataKeyto, error_val)
+						}
+					}
+				})
+			}
 		},
 		canSubmit: function () {
 			return this.isReady && !this.isSubmiting;

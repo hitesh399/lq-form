@@ -140,7 +140,7 @@ const formElementMix = {
 
         // Add initial value if does not already have the value.
         if (window.validatejs.isEmpty(this.LQElement) && this.makeInItVal !== undefined) {
-            this.setValue(this.makeInItVal, false);
+            this.setValue(this.makeInItVal, false, false, false);
         }
         /**
          * Add Element props
@@ -162,7 +162,7 @@ const formElementMix = {
             return this.LQElement || this.LQElement === undefined ? this.LQElement : defulatValue;
         },
 
-        setValue: function (value, broadcast = true, checkValidation = true) {
+        setValue: function (value, broadcast = true, checkValidation = true, makeDirty = true) {
 
             if (!this.lqElRules && this.elError) {
                 this.removeError();
@@ -170,6 +170,12 @@ const formElementMix = {
 
             if (typeof this.customValueTransformer === 'function') {
                 value = this.customValueTransformer(value);
+            }
+            /**
+            * Make form dirty
+            */
+            if (value !== this.LQElement && !this.lqForm.dirty && makeDirty) {
+                this.$store.dispatch('form/addSetting', { formName: this.formName, name: 'dirty', value: true })
             }
 
             // For: Element name should always present in data collecton.
@@ -183,6 +189,8 @@ const formElementMix = {
             if (broadcast) {
                 EventBus.$emit(this.formName + '_changed')
             }
+
+
             /**
              * Check validation rules.
              */
@@ -336,7 +344,7 @@ const formElementMix = {
             if (notify) {
                 this.$emit('element-validated', test, _errorRoles);
             }
-            return (!returnRuleAndMessage)  ? test : {test, rules: _errorRoles}
+            return (!returnRuleAndMessage) ? test : { test, rules: _errorRoles }
         },
 
         /**
