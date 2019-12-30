@@ -9,6 +9,7 @@
     "test:e2e": "vue-cli-service test:e2e",
     "update-plugins": "node plugins_update",
     "test:unit": "vue-cli-service test:unit"
+    
   },
   "main": "dist/lq.form.umd.js",
   "dependencies": {

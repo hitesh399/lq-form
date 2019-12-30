@@ -11,7 +11,7 @@ import errorLang from './fileErrorLang';
 export function generateErrorMessage(type, attribues, message) {
     let error_rule = '[::file:' + type + '::]'
     if (message) {
-        
+
         if (typeof message === 'function') {
             return message(type, attribues) + error_rule;
         } else if (typeof message === 'object') {
@@ -50,9 +50,21 @@ function fileValidation(value, rules, elementName, values, options) {
         max,
         crop
     } = rules;
-    value = value ? value : {};
+    let id, cropped, file = null;
 
-    const { id, cropped, file } = value;
+    if (value instanceof File || value instanceof Blob) {
+        id = null;
+        cropped = null;
+        file = value
+    } else if (typeof value === 'string' || value === null) {
+        return (!value && required) ? generateErrorMessage('required', {}, message) : ''
+
+    } else {
+        value = value ? value : {};
+        id = value.id;
+        cropped = value.cropped;
+        file = value.file;
+    }
 
     let maxFileSizeBytes = maxFileSize ? maxFileSize * 1000000 : null;
     let minFileSizeBytes = minFileSize ? minFileSize * 1000000 : null;
