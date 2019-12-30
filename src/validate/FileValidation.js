@@ -93,7 +93,7 @@ function fileValidation(value, rules, elementName, values, options) {
 
         fReader.onload = function (e) {
 
-            let attribues = { maxFileSize, minFileSize, fileSize: parseFloat(e.total / (1024 * 1204)).toFixed(2), acceptedFiles: acceptedFiles };
+            let attribues = { maxFileSize, minFileSize, fileSize: parseFloat(e.total / 1000000).toFixed(2), acceptedFiles: acceptedFiles };
 
             /**
              * Checking file extensions
