@@ -208,7 +208,7 @@ export function formHelper(store) {
     /**
      * To Replace the Object key
      */
-    this.transformDataKey = function (data, transformKeys, fields, extraDataKeys) {
+    this.transformDataKey = function (data, transformKeys, fields, extraDataKeys, force = false) {
         if (!transformKeys) return;
         transformKeys.forEach((tk) => {
             const keys = tk.split(':');
@@ -216,13 +216,28 @@ export function formHelper(store) {
             if (keys.length === 2) {
                 const dataKeyFrom = keys[0];
                 const dataKeyto = keys[1];
-                if (fields[dataKeyFrom] || (extraDataKeys && extraDataKeys.includes(dataKeyFrom)) ) {
-                    if (helper.getProp(data, dataKeyFrom)) {
-                        const val = helper.getProp(data, dataKeyFrom);
-                        helper.deleteProp(data, dataKeyFrom);
-                        helper.setProp(data, dataKeyto, val)
+                const hasAsterisk = dataKeyFrom.includes('*')
+                if (force === true || hasAsterisk || fields[dataKeyFrom] || (extraDataKeys && extraDataKeys.includes(dataKeyFrom))) {
+                    if (hasAsterisk) {
+                        let key_arr = dataKeyFrom.split('.');
+                        let to_key_arr = dataKeyto.split('.');
+                        const lastFromKey = key_arr.pop();
+                        key_arr.pop()
+                        const lastToKey = to_key_arr.pop();
+                        let nested_values = helper.getProp(data, key_arr)
+                        if (helper.isArray(nested_values)) {
+                            nested_values.forEach(v => {
+                                this.transformDataKey(v, [`${lastFromKey}:${lastToKey}`], null, null, true)
+                            })
+                        }
                     } else {
-                        helper.setProp(data, dataKeyto, null)
+                        if (helper.getProp(data, dataKeyFrom)) {
+                            const val = helper.getProp(data, dataKeyFrom);
+                            helper.deleteProp(data, dataKeyFrom);
+                            helper.setProp(data, dataKeyto, val)
+                        } else {
+                            helper.setProp(data, dataKeyto, null)
+                        }
                     }
                 } else {
                     helper.deleteProp(data, dataKeyFrom);

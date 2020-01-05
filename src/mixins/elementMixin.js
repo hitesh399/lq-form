@@ -140,14 +140,15 @@ const formElementMix = {
 
         // Add initial value if does not already have the value.
         if (window.validatejs.isEmpty(this.LQElement) && this.makeInItVal !== undefined) {
-            this.setValue(this.makeInItVal, false, false, false);
+            this.setValue(this.makeInItVal, false, false);
         }
         /**
          * Add Element props
          */
         this.$lqForm.addProps(this.formName, this.id, {
             touch: false,
-            test: this.validate
+            test: this.validate,
+            dirty: false
         });
     },
 
@@ -162,7 +163,7 @@ const formElementMix = {
             return this.LQElement || this.LQElement === undefined ? this.LQElement : defulatValue;
         },
 
-        setValue: function (value, broadcast = true, checkValidation = true, makeDirty = true) {
+        setValue: function (value, broadcast = true, checkValidation = true) {
 
             if (!this.lqElRules && this.elError) {
                 this.removeError();
@@ -170,12 +171,6 @@ const formElementMix = {
 
             if (typeof this.customValueTransformer === 'function') {
                 value = this.customValueTransformer(value);
-            }
-            /**
-            * Make form dirty
-            */
-            if (value !== this.LQElement && !this.lqForm.dirty && makeDirty) {
-                this.$store.dispatch('form/addSetting', { formName: this.formName, name: 'dirty', value: true })
             }
 
             // For: Element name should always present in data collecton.
@@ -189,8 +184,11 @@ const formElementMix = {
             if (broadcast) {
                 EventBus.$emit(this.formName + '_changed')
             }
-
-
+            /**
+             * Make form dirty
+             * LQElement
+             */
+            this.testDirty(value)
             /**
              * Check validation rules.
              */
@@ -208,7 +206,23 @@ const formElementMix = {
             errors = !helper.isArray(errors) ? [errors] : errors;
             this.$lqForm.addError(this.formName, elementName, errors);
         },
-
+        testDirty(value) {
+            // if (typeof this.__formatter === 'function' ) {
+            //     console.log('T1', this.__formatter(this.initializevalue))
+            //     console.log('T2', this.__formatter(value))
+            //     console.log('Compare', JSON.stringify( this.__formatter(value)) ==  JSON.stringify(this.__formatter(this.initializevalue)))
+            // }
+            // console.log('this.__formatter', this.__formatter, this.id,  {...this.initializevalue}, {...value    })
+            if (!this.initializevalue && !value) {
+                this.$lqForm.addProp(this.formName, this.id, 'dirty', false);
+            } else if (this.initializevalue === value) {
+                this.$lqForm.addProp(this.formName, this.id, 'dirty', false);
+            } else if (typeof this.__formatter === 'function' && JSON.stringify( this.__formatter(this.initializevalue)) === JSON.stringify( this.__formatter(value))) {
+                this.$lqForm.addProp(this.formName, this.id, 'dirty', false);
+            } else if (!this.field.dirty) {
+                this.$lqForm.addProp(this.formName, this.id, 'dirty', true);
+            }
+        },
         /**
          * To remove the Element error
          * @param {String} elementName

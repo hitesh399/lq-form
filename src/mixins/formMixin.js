@@ -102,7 +102,9 @@ const formMixin = {
 		},
 		dirty: function () {
 
-			return helper.getProp(this.$store.state.form, `${this.formName}.settings.dirty`, false);
+			const fields = helper.getProp(this.$store.state.form, `${this.formName}.fields`, {});
+			const fieldNames = Object.keys(fields);
+			return fieldNames.some(fieldName => fields[fieldName].dirty === true)
 		},
 		isSubmiting: function () {
 
@@ -139,7 +141,7 @@ const formMixin = {
 					extraDataKeys: this.extraDataKeys,
 					submit: this.submit,
 					test: this.validate,
-					dirty: false
+					// dirty: false
 				}
 			});
 		},
@@ -298,6 +300,7 @@ const formMixin = {
 				axiosConfig.url = axiosConfig.url + '?' + helper.objectToQueryString(data)
 				// axios.paramsSerializer = (params) => helper.objectToQueryString(params)
 			} else {
+				// console.log('data', data)
 				axiosConfig.data = (this.contentType === 'formdata') ? helper.objectToFormData(data) : data
 			}
 
@@ -356,10 +359,32 @@ const formMixin = {
 					if (keys.length === 2) {
 						const dataKeyFrom = keys[1];
 						const dataKeyto = keys[0];
-						const error_val = helper.getProp(errors, dataKeyFrom);
-						if (error_val) {
-							helper.deleteProp(errors, dataKeyFrom);
-							helper.setProp(errors, dataKeyto, error_val)
+						const hasAsterisk = dataKeyFrom.includes('*')
+						if (hasAsterisk && typeof errors === 'object') {
+							// 
+							const error_keys = Object.keys(errors)
+							error_keys.forEach((k) => {
+								let replace_digit_to_asterisk = k.replace(/\.+([0-9]+)+\./gi, '.*.');
+								if (replace_digit_to_asterisk === dataKeyFrom) {
+									const _val = errors[k]
+									if (_val) {
+										delete errors[k]
+										// Now Time to Transform
+										let to_key_arr = dataKeyto.split('.');
+										const lastToKey = to_key_arr.pop();
+										let current_key = k.split('.')
+										current_key.pop()
+										current_key.push(lastToKey)
+										errors[current_key.join('.')] = _val
+									}
+								}
+							})
+						} else {
+							const error_val = helper.getProp(errors, [dataKeyFrom]);
+							if (error_val) {
+								helper.deleteProp(errors, [dataKeyFrom]);
+								helper.setProp(errors, [dataKeyto], error_val)
+							}
 						}
 					}
 				})
