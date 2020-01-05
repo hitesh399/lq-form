@@ -295,8 +295,8 @@ const formMixin = {
 			 */
 
 			if (_method === 'get') {
-				axiosConfig.params = data
-				axios.paramsSerializer = (params) => helper.objectToQueryString(params)
+				axiosConfig.url = axiosConfig.url + '?' + helper.objectToQueryString(data)
+				// axios.paramsSerializer = (params) => helper.objectToQueryString(params)
 			} else {
 				axiosConfig.data = (this.contentType === 'formdata') ? helper.objectToFormData(data) : data
 			}
@@ -337,7 +337,7 @@ const formMixin = {
 					}
 					if (helper.getProp(error, 'response.status') === 422 && this.autoAssignErrors) {
 
-						let errors = helper.getProp(error, this.formErrorKey, {})
+						let errors = helper.getProp(error, this.errorKey, {})
 						this.compliesErrors(errors)
 						this.addErrors(errors);
 						const error_field_names = Object.keys(errors)
