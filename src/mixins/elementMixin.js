@@ -37,7 +37,7 @@ const formElementMix = {
             return helper.getProp(this.$store.state.form, [this.formName, 'errors'], null);
         },
         simpleName: function () {
-            return this.id.replaceAll(new RegExp("\.[0-9]+\."), '.*.');
+            return this.id.replaceAll(new RegExp("\.[0-9]+\.?"), '.*.');
         },
         /**
          * Get all error of element, if there is any validation rule in nested data.
