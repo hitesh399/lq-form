@@ -1,6 +1,12 @@
 import helper from 'vuejs-object-helper';
 
 export default {
+	props: {
+		checkPermission: {
+			type: Boolean,
+			default: () => true
+		}
+	},
 	data: function () {
 		return {
 			elementIdKey: 'id'
@@ -79,7 +85,9 @@ export default {
 	watch: {
 		hasAccess: {
 			handler(newValue) {
-				helper.setProp(this.lqForm.elementVisibility, this[this.elementIdKey], newValue)
+				if (this.checkPermission) {
+					helper.setProp(this.lqForm.elementVisibility, this[this.elementIdKey], newValue)
+				}
 			},
 			immediate: true
 		}
