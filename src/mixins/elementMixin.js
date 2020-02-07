@@ -148,6 +148,7 @@ const formElementMix = {
         this.$lqForm.addProps(this.formName, this.id, {
             touch: false,
             test: this.validate,
+            formatter: null,
             dirty: false
         });
     },
