@@ -275,7 +275,7 @@ const formMixin = {
 			if (this.hasError()) {
 				this.$root.$emit('has-error', this);
 				this.$emit('errors', this)
-				return Promise.reject({ reason: 'loacl-error' })
+				return Promise.reject({ reason: 'local-error' })
 			}
 
 			const _method = this.requestMethod.toString().toLowerCase()
