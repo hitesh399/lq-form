@@ -45,7 +45,8 @@ const formMixin = {
 		errorKey: {
 			type: [String, Array],
 			default: () => lqFormOptions.formErrorKey
-		}
+		},
+		dataMapFunc: Function
 	},
 	data: function () {
 		return {
@@ -290,6 +291,9 @@ const formMixin = {
 			let data = this.formData;
 			if (more_data) {
 				data = { ...data, ...more_data };
+			}
+			if (typeof this.dataMapFunc === 'function') {
+				this.dataMapFunc(data)
 			}
 
 			/**
