@@ -92,7 +92,7 @@ const formElementMix = {
             return this.id.split('.').map(function (item, index) { return index > 0 ? '[' + item + ']' : item }).join('');
         },
         myRulesInForm: function () {
-            return helper.getProp(this.lqForm.rules, this.simpleName, null)
+            return helper.getProp(this.lqForm.rules, [this.simpleName], null)
         },
         /**
          * Get form values
