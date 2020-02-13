@@ -274,15 +274,19 @@ const formElementMix = {
          * @param {Boolean} changeReadyStatus
          */
         validate: async function (changeReadyStatus = true, onlyTouchedTest = true, notify = true, returnRuleAndMessage = false) {
+            // console.log('Test', this.id, this.LQElement)
             if (!this.lqElRules) {
                 this.removeAllErrors();
+                // console.log('Test 1', this.id)
                 return;
             }
             if (!this.touch && onlyTouchedTest) {
+                // console.log('Test 2', this.id)
                 return;
             }
             if (this.validating && this.validationCallback === null) {
                 this.validationCallback = () => this.validate(changeReadyStatus, onlyTouchedTest, notify, returnRuleAndMessage);
+                // console.log('Test 3', this.id)
                 return;
             }
             this.removeAllErrors();
@@ -304,13 +308,17 @@ const formElementMix = {
                 })
             } else {
                 validation_rules[this.id] = this.lqElRules;
+                helper.setProp(element_values, this.id, this.LQElement)
             }
-            element_values[this.id] = this.LQElement;
+            // 
+
+            // console.log('element_values', element_values, this.id, validation_rules)
             let _errorRoles = [];
 
             const test = await new Promise((resolve) => {
                 window.validatejs.async(element_values, validation_rules, options)
                     .then((response) => {
+                        // console.log('Test result s', response, this.id)
                         if (!this.validationCallback) {
                             resolve()
                             const error_elements = Object.keys(element_values);
@@ -328,7 +336,7 @@ const formElementMix = {
                     })
                     .catch((errors) => {
                         if (!this.validationCallback) {
-
+                            // console.log('Test result E', errors, this.id)
                             let _error_messages = {};
                             const error_elements = Object.keys(errors);
                             error_elements.forEach((error_element) => {
@@ -360,6 +368,7 @@ const formElementMix = {
             });
             changeReadyStatus ? this.ready(true) : null;
             this.validatingStatus(false);
+            // console.log('Result', this.id, this.LQElement, test)
             if (notify) {
                 this.$emit('element-validated', test, _errorRoles);
             }
