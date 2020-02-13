@@ -22,6 +22,10 @@ const formElementMix = {
             default: () => null
         },
         disabled: Boolean,
+        keepAlive: {
+            type: Boolean,
+            default: () => true
+        }
     },
     computed: {
         /**
@@ -218,7 +222,7 @@ const formElementMix = {
                 this.$lqForm.addProp(this.formName, this.id, 'dirty', false);
             } else if (this.initializevalue === value) {
                 this.$lqForm.addProp(this.formName, this.id, 'dirty', false);
-            } else if (typeof this.__formatter === 'function' && JSON.stringify( this.__formatter(this.initializevalue)) === JSON.stringify( this.__formatter(value))) {
+            } else if (typeof this.__formatter === 'function' && JSON.stringify(this.__formatter(this.initializevalue)) === JSON.stringify(this.__formatter(value))) {
                 this.$lqForm.addProp(this.formName, this.id, 'dirty', false);
             } else if (!this.field.dirty) {
                 this.$lqForm.addProp(this.formName, this.id, 'dirty', true);
@@ -382,6 +386,11 @@ const formElementMix = {
             if (event.type === 'focus' && !this.field.touch) {
                 this.touchStatus(true);
             }
+        }
+    },
+    beforeDestroy() {
+        if (!this.keepAlive) {
+            this.$lqForm.removeElement(this.formName, this.id)
         }
     }
 

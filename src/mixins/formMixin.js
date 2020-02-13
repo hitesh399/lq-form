@@ -258,8 +258,9 @@ const formMixin = {
 					tests.push(test(false, false, false));
 				}
 			});
-			return Promise.all(tests).then(() => {
+			return Promise.all(tests).then((response) => {
 				this.ready(true);
+				return response
 			});
 		},
 
