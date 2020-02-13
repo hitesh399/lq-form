@@ -274,7 +274,7 @@ const formElementMix = {
          * @param {Boolean} changeReadyStatus
          */
         validate: async function (changeReadyStatus = true, onlyTouchedTest = true, notify = true, returnRuleAndMessage = false) {
-            // console.log('Test', this.id, this.LQElement)
+            // console.log('Test', this.id, this.LQElement, this.lqElRules)
             if (!this.lqElRules) {
                 this.removeAllErrors();
                 // console.log('Test 1', this.id)
