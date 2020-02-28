@@ -26,6 +26,8 @@ import lqManualfilter from './store/modules/manualfilter';
 
 import { lqFormOptions } from './defaultOptions'
 
+import './directives/lqModel'
+
 /**
  * Form Helper Class
  */
