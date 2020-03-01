@@ -1,24 +1,32 @@
 import Vue from 'vue';
+import { isEqual } from 'lodash/core'
+import helper from 'vuejs-object-helper'
+
 Vue.directive('lqModel', {
 
-    inserted: function (el, binding, vnode) {
-        let id = binding.value ? binding.value.id : (vnode.data.attrs.id || vnode.data.attrs.name)
-        let value = el.value
+    bind: function (el, binding, vnode) {
+        console.log('shd 1', el, vnode)
+        let id = binding.value && binding.value.id ? binding.value.id : (vnode.data.attrs.id || vnode.data.attrs.name)
         const { context } = vnode
-        // console.log(el, binding, vnode, 'Bnode')
-
-        let lqForm = null
-        context.$children.every(ctx => {
-            if (ctx.formName) {
-                lqForm = ctx
-                return false
-            }
-            return true
-        })
+        // console.log(vnode, 'Bnode', id)
+        let lqForm = getForm(context)
+        // console.log('lqForm', lqForm, context, vnode)
         if (!lqForm) return
-        const isChoosable = ['checkbox', 'radio', 'select-multiple'].includes(el.type)
+        // console.log('lqFormlqFormlqFormlqForm', lqForm.formValues, id)
+        const storeValue = context.$helper.getProp(lqForm.formValues, id, null)
+        
+        if (storeValue) {
+            if (vnode.componentOptions) {
+                helper.setProp(vnode.componentOptions, 'propsData.value', storeValue)
+            } else {
+                el.value = storeValue
+            }
+        }
+        let value = el.value
+        // console.log('value', vnode)
+        const isChoosable = ['checkbox', 'radio', 'select-multiple', 'select'].includes(el.type)
         if (value) {
-            if (isChoosable && el.checked && el.type !== 'select-multiple') {
+            if (isChoosable && el.checked && ['checkbox', 'radio'].includes(el.type)) {
                 if (el.type === 'checkbox') {
                     let __value = context.$helper.getProp(lqForm.formValues, id, [])
                     __value = __value && !context.$helper.isArray(__value) ? [__value] : (__value ? __value : [])
@@ -30,7 +38,7 @@ Vue.directive('lqModel', {
                 } else {
                     context.$lqForm.setElementVal(lqForm.name, id, value, false)
                 }
-            } else if (el.type === 'select-multiple') {
+            } else if (['select-multiple', 'select'].includes(el.type)) {
                 value = []
                 let selectedLength = el.selectedOptions.length
                 for (let i = 0; i < selectedLength; i++) {
@@ -57,30 +65,81 @@ Vue.directive('lqModel', {
             validateOnEvent: context.$helper.getProp(vnode.data.attrs, 'validate-on-event', 'change'),
             simpleName: id.replaceAll(new RegExp("\.[0-9]+\.?"), '.*.')
         }
-
         context.$lqForm.addProps(lqForm.name, id, {
             touch: false,
             test: validate.bind(_this),
             formatter: null,
             dirty: false
         });
-
-        el.addEventListener('change', whenChange.bind(_this))
-        el.addEventListener('focus', setAsTouch.bind(_this))
-        el.addEventListener('click', whenClick.bind(_this))
-        el.addEventListener('blur', whenBlur.bind(_this))
-        el.addEventListener('keyup', whenKeyUp.bind(_this))
+        const model_event = helper.getProp(vnode, 'componentInstance.$_modelEvent', 'input')
+        // console.log('el.type', model_event)
+        if (vnode.componentInstance) {
+            vnode.componentInstance.$on(model_event, whenChange.bind(_this))
+            vnode.componentInstance.$on('focus', setAsTouch.bind(_this))
+            vnode.componentInstance.$on('click', whenClick.bind(_this))
+            vnode.componentInstance.$on('blur', whenBlur.bind(_this))
+            vnode.componentInstance.$on('keyup', whenKeyUp.bind(_this))
+        } else {
+            el.addEventListener(model_event, whenChange.bind(_this))
+            el.addEventListener('focus', setAsTouch.bind(_this))
+            el.addEventListener('click', whenClick.bind(_this))
+            el.addEventListener('blur', whenBlur.bind(_this))
+            el.addEventListener('keyup', whenKeyUp.bind(_this))
+        }
+        context.$store.watch(() => context.$store.getters['form/initializeValues'](lqForm.name), (res, oldValue) => {
+            if (isEqual(res, oldValue)) {
+                return
+            }
+            let init_value = res[id] ? res[id] : null
+            // console.log('I am changed', oldValue, res)
+            if (isChoosable) {
+                init_value = context.$helper.isArray(init_value) ? init_value : (init_value ? [init_value] : [])
+                if (['select-multiple', 'select'].includes(el.type)) {
+                    let optionsLength = el.options.length
+                    for (let i = 0; i < optionsLength; i++) {
+                        const opt = el.options[i]
+                        opt.defaultSelected = init_value.includes(opt.value)
+                    }
+                } else {
+                    el.checked = init_value.includes(el.value)
+                }
+            } else {
+                el.value = init_value
+            }
+        })
+    },
+    inserted: function (el, binding, vnode) {
+        // console.log('shd 2', binding)
 
     },
-    // bind: function () { },
-    // update: function () { },
-    unbind: function (el) {
-        // console.log('I am unbind')
-        el.removeEventListener('change', whenChange)
-        el.removeEventListener('focus', setAsTouch)
-        el.removeEventListener('click', whenClick)
-        el.removeEventListener('blur', whenBlur)
-        el.removeEventListener('keyup', whenKeyUp)
+    update: function (el) {
+        // console.log('I am skdskhsk', el)
+    },
+    unbind: function (el, binding, vnode) {
+        const model_event = helper.getProp(vnode, 'componentInstance.$_modelEvent', 'input')
+        if (vnode.componentInstance) {
+            vnode.componentInstance.$off(model_event, whenChange)
+            vnode.componentInstance.$on('focus', setAsTouch)
+            vnode.componentInstance.$on('click', whenClick)
+            vnode.componentInstance.$on('blur', whenBlur)
+            vnode.componentInstance.$on('keyup', whenKeyUp)
+        } else {
+            el.removeEventListener(model_event, whenChange)
+            el.removeEventListener('focus', setAsTouch)
+            el.removeEventListener('click', whenClick)
+            el.removeEventListener('blur', whenBlur)
+            el.removeEventListener('keyup', whenKeyUp)
+        }
+        // el.removeEventListener('change', whenChange)
+
+        let id = binding.value && binding.value.id ? binding.value.id : (vnode.data.attrs.id || vnode.data.attrs.name)
+        const { context } = vnode
+        const keepAlive = context.$helper.getProp(vnode.data.attrs, 'keep-alive', true)
+
+        let lqForm = getForm(context)
+        if (!keepAlive) {
+            context.$lqForm.removeElement(lqForm.name, id)
+        }
     }
 })
 
@@ -96,7 +155,8 @@ function whenKeyUp(event) {
 }
 
 function whenChange(event) {
-    const value = event.target.value
+    // console.log('I am here Tested.', event)
+    const value = event instanceof InputEvent ? event.target.value : event
     if (!this.isChoosable) {
         this.$lqForm.setElementVal(this.lqForm.name, this.id, value, false)
     } else {
@@ -120,7 +180,7 @@ function whenChange(event) {
                 __value.splice(index, 1)
             }
             this.$lqForm.setElementVal(this.lqForm.name, this.id, __value, false)
-        } else if (this.nativeType === 'select-multiple') {
+        } else if (['select-multiple', 'select'].includes(this.nativeType)) {
             let __value = []
             let selectedLength = event.target.selectedOptions.length
             for (let i = 0; i < selectedLength; i++) {
@@ -153,7 +213,8 @@ function whenChange(event) {
 }
 
 function whenClick(event) {
-    if (this.validateOnEvent === 'keyup') {
+    console.log('Test Click')
+    if (this.validateOnEvent === 'click') {
         validate.bind(this)(true, true)
     }
     setAsTouch.bind(this)(event)
@@ -194,7 +255,6 @@ async function validate(changeReadyStatus = true, onlyTouchedTest = true) {
     let element_values = {};
     validation_rules[this.id] = lqElRules;
     this.$helper.setProp(element_values, this.id, value)
-    console.log('Middle')
     const test = await new Promise((resolve) => {
         window.validatejs.async(element_values, validation_rules, options)
             .then(() => resolve())
@@ -242,4 +302,18 @@ function removeAllErrors() {
             this.$lqForm.removeError(this.formName, this.id);
         })
     }
+}
+
+
+function getForm(context) {
+    let lqForm = null
+    context.$children && context.$children.every(ctx => {
+        if (ctx.formName) {
+            lqForm = ctx
+            return false
+        }
+        lqForm = getForm(ctx)
+        return true
+    })
+    return lqForm
 }

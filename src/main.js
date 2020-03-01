@@ -14,6 +14,7 @@ import lqFileMixin from './mixins/fileMixin';
  * LQ Form Components 
  */
 import lqList from './components/List'
+import lqForm from './components/Form'
 import { EventBus } from './components/event-bus'
 import lqListFilter from './components/List/Filter'
 import FilterBtn from './components/List/FilterBtn'
@@ -59,6 +60,7 @@ export default {
         Vue.use(formHelper, { store: options.store });
         Vue.use(rTable, { store: options.store });
         Vue.component('lq-list', lqList);
+        Vue.component('lq-form', lqForm);
         Vue.component('lq-list-filter', lqListFilter);
         Vue.component('lq-filter-btn', FilterBtn);
     }

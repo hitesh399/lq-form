@@ -15,6 +15,9 @@ const getters = {
 	values: (state) => (formName) => {
 		return state[formName] && state[formName].values ? state[formName].values : {};
 	},
+	initializeValues: (state) => (formName) => {
+		return state[formName] && state[formName].initialize_values ? state[formName].initialize_values : {};
+	},
 	settings: (state) => (formName) => {
 		return state[formName] && state[formName].settings ? state[formName].settings : {};
 	},
